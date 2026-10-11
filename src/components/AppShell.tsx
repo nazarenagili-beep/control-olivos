@@ -4,7 +4,7 @@ import {
   Calculator,
   CalendarDays,
   FlaskConical,
-  Home,
+  Home, Info,
   LogOut,
   Menu,
   Package,
@@ -21,6 +21,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 
 const NAV = [
   { to: "/", label: "Inicio", icon: Home },
+  { to: "/informacion", label: "Información relevante", icon: Info },
   { to: "/calendario", label: "Calendario", icon: CalendarDays },
   { to: "/tratamientos", label: "Tratamientos", icon: FlaskConical },
   { to: "/calculadora", label: "Calculadora", icon: Calculator },
