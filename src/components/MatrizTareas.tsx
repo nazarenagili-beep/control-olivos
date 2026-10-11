@@ -34,7 +34,7 @@ export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: 
         const t = s.tareas.find((x) => x.id === d.tareaId);
         if (t) {
           const set = new Set(t.secciones_hechas);
-          d.secs.forEach((k) => (d.marcar ? set.add(k) : set.delete(k)));
+          d.secs.forEach((f) => [`${f}:A`, `${f}:B`].forEach((k) => (d.marcar ? set.add(k) : set.delete(k))));
           s.setSeccionesHechas(t.id, [...set]);
         }
       }
@@ -91,7 +91,7 @@ export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: 
             ))}
           </tr>
           <tr>
-            <th className="sticky left-0 z-10 border border-border bg-ov-gold/20 p-1 text-left font-normal text-muted-foreground">Mitad A | B de cada fila</th>
+            <th className="sticky left-0 z-10 border border-border bg-ov-gold/20 p-1 text-left font-normal text-muted-foreground">Filas</th>
             {filas.map((f) => (
               <th key={f.id} className="min-w-10 whitespace-nowrap border border-border bg-ov-gold/20 px-1 py-0.5 font-normal">Fila {f.numero}</th>
             ))}
@@ -123,29 +123,25 @@ export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: 
                     const c = celda(t, f);
                     return (
                       <td key={f.id} className="border border-border p-0">
-                        {c && (
-                          <div className="flex h-6 w-full select-none" style={{ touchAction: "none" }} title={`Fila ${f.numero}: A ${c.a ? "hecha" : "pendiente"} · B ${c.b ? "hecha" : "pendiente"}`}>
-                            {(["A", "B"] as const).map((z) => {
-                              const sec = `${f.id}:${z}`;
-                              const hecha = z === "A" ? c.a : c.b;
-                              const enSel = drag?.tareaId === t.id && drag.secs.includes(sec);
-                              const ver = enSel ? drag!.marcar : hecha;
-                              return (
-                                <span
-                                  key={z}
-                                  data-sec={sec}
-                                  data-tarea={t.id}
-                                  onPointerDown={(e) => {
-                                    if (t.estado === "hecha") return onOpen(t);
-                                    e.preventDefault();
-                                    setDrag({ tareaId: t.id, marcar: !hecha, secs: [sec] });
-                                  }}
-                                  className={cn("flex-1 cursor-pointer", z === "A" && "border-r border-card", ver ? "bg-ov-olive-light" : "bg-ov-beige-light", enSel && "ring-2 ring-inset ring-ov-olive-dark")}
-                                />
-                              );
-                            })}
-                          </div>
-                        )}
+                        {c && (() => {
+                            const hecha = c.a && c.b;
+                            const enSel = drag?.tareaId === t.id && drag.secs.includes(f.id);
+                            const ver = enSel ? drag!.marcar : hecha;
+                            return (
+                              <span
+                                data-sec={f.id}
+                                data-tarea={t.id}
+                                title={`Fila ${f.numero}: ${hecha ? "hecha" : c.a || c.b ? "a medias" : "pendiente"}`}
+                                style={{ touchAction: "none" }}
+                                onPointerDown={(e) => {
+                                  if (t.estado === "hecha") return onOpen(t);
+                                  e.preventDefault();
+                                  setDrag({ tareaId: t.id, marcar: !hecha, secs: [f.id] });
+                                }}
+                                className={cn("block h-6 w-full cursor-pointer select-none", ver ? "bg-ov-olive-light" : c.a || c.b ? "bg-ov-olive-light/40" : "bg-ov-beige-light", enSel && "ring-2 ring-inset ring-ov-olive-dark")}
+                              />
+                            );
+                          })()}
                       </td>
                     );
                   })}
@@ -158,8 +154,8 @@ export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: 
       <div className="flex flex-wrap gap-4 border-t border-border p-3 text-xs">
         <span className="flex items-center gap-1.5"><span className="h-3 w-5 bg-ov-olive-light" /> Hecho</span>
         <span className="flex items-center gap-1.5"><span className="h-3 w-5 bg-ov-beige-light" /> Pendiente</span>
-        <span>Tocá o arrastrá sobre las casillas de una tarea para marcar varias mitades como hechas (o desmarcarlas) de una vez. Tocá el nombre de la tarea para ver el detalle.</span>
-        <span>Cada casilla tiene dos mitades: izquierda = zona A, derecha = zona B. Casilla vacía = la tarea no aplica a esa fila.</span>
+        <span>Tocá o arrastrá sobre las casillas de una tarea para marcar varias filas como hechas (o desmarcarlas) de una vez. Tocá el nombre de la tarea para ver el detalle.</span>
+        <span>Cada casilla es una fila completa. Casilla vacía = la tarea no aplica a esa fila.</span>
       </div>
     </div>
   );
