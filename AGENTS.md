@@ -8,3 +8,8 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+## Architecture rules
+- Phase 1 business data lives in an in-memory React store (src/lib/store.tsx) — temporary until Lovable Cloud replaces it; never use localStorage for business data.
+- Domain math (dose calc, safety-interval per row, harvest conflicts) lives in src/lib/logic.ts so UI and future server code share one implementation.
+- tsconfig strict extras (exactOptionalPropertyTypes etc.) are disabled to keep UI code simple.
