@@ -9,7 +9,7 @@ import { UNIDAD_DOSIS_LABEL } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PageHeader, SimpleSelect, filasTexto, zonaLabel } from "@/components/ov";
+import { PageHeader, SimpleSelect, seccionesTexto } from "@/components/ov";
 
 export const Route = createFileRoute("/tratamientos/")({
   head: () => pageHead("Tratamientos", "Registro de aplicaciones de productos en el olivar."),
@@ -30,7 +30,7 @@ function Tratamientos() {
 
   const exportar = () => {
     const rows = [["Fecha", "Producto", "Cuadro", "Filas", "Zona", "Litros caldo", "Dosis", "Cantidad", "Aplicado por", "Libre cosecha"]];
-    lista.forEach((a) => rows.push([fmt(a.fecha), P(a.producto_id)?.nombre_comercial ?? "", nombreCuadro(s.cuadros, a.cuadro_id), filasTexto(s.filas, a.fila_ids), zonaLabel(a.zona), String(a.litros_caldo), `${a.dosis_usada} ${UNIDAD_DOSIS_LABEL[a.unidad_dosis]}`, `${a.cantidad_producto} ${P(a.producto_id)?.unidad_stock}`, U(a.aplicado_por), fmt(a.fecha_libre_cosecha)]));
+    lista.forEach((a) => rows.push([fmt(a.fecha), P(a.producto_id)?.nombre_comercial ?? "", nombreCuadro(s.cuadros, a.cuadro_id), seccionesTexto(s.filas, a.secciones), String(a.litros_caldo), `${a.dosis_usada} ${UNIDAD_DOSIS_LABEL[a.unidad_dosis]}`, `${a.cantidad_producto} ${P(a.producto_id)?.unidad_stock}`, U(a.aplicado_por), fmt(a.fecha_libre_cosecha)]));
     const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(";")).join("\n");
     const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv" }));
     const el = document.createElement("a");

@@ -5,12 +5,12 @@ import { toast } from "sonner";
 import { pageHead } from "@/lib/head";
 import { useStore } from "@/lib/store";
 import { addDays, cantidadBase, fmt, num } from "@/lib/logic";
-import type { Aplicacion, UnidadDosis, Zona } from "@/lib/data";
+import type { Aplicacion, UnidadDosis } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
-import { Field, FilasPicker, PageHeader, SimpleSelect, ZONA_OPTS } from "@/components/ov";
+import { Field, MapaFilas, PageHeader, SimpleSelect, filasDeSecciones } from "@/components/ov";
 import { DosisInputs, LitrosInput, ResultadoDosis } from "@/components/Calculadora";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 
@@ -28,8 +28,7 @@ function Nueva() {
   const activos = s.productos.filter((p) => p.activo);
   const [fecha, setFecha] = useState(s.hoy);
   const [cuadro, setCuadro] = useState(tarea?.cuadro_id ?? s.cuadros[0].id);
-  const [filaIds, setFilaIds] = useState<string[]>(tarea?.fila_ids ?? []);
-  const [zona, setZona] = useState<Zona>(tarea?.zona ?? "ambas");
+  const [secciones, setSecciones] = useState<string[]>(tarea?.secciones ?? []);
   const [prodId, setProdId] = useState(activos[0]?.id ?? "");
   const prod = s.productos.find((p) => p.id === prodId);
   const [litros, setLitros] = useState(16);
@@ -62,7 +61,7 @@ function Nueva() {
   };
   const guardar = () => {
     const r = s.addAplicacion({
-      fecha, producto_id: prodId, cuadro_id: cuadro, fila_ids: filaIds, zona, litros_caldo: litros, dosis_usada: dosis, unidad_dosis: unidad,
+      fecha, producto_id: prodId, cuadro_id: cuadro, fila_ids: filasDeSecciones(secciones), secciones, litros_caldo: litros, dosis_usada: dosis, unidad_dosis: unidad,
       cantidad_producto: cantidad, aplicado_por: por, tarea_id: tareaVinc === "none" ? null : tareaVinc, temperatura_c: temp ? Number(temp) : null,
       viento, lluvia_prevista_24h: lluvia, notas,
     });
@@ -80,11 +79,10 @@ function Nueva() {
             <SimpleSelect value={por} onChange={setPor} options={s.usuarios.filter((u) => u.activo).map((u) => ({ value: u.id, label: u.nombre }))} />
           </Field>
           <Field label="Cuadro">
-            <SimpleSelect value={cuadro} onChange={(v) => { setCuadro(v); setFilaIds([]); }} options={s.cuadros.map((c) => ({ value: c.id, label: c.nombre }))} />
+            <SimpleSelect value={cuadro} onChange={(v) => { setCuadro(v); setSecciones([]); }} options={s.cuadros.map((c) => ({ value: c.id, label: c.nombre }))} />
           </Field>
-          <Field label="Zona"><SimpleSelect value={zona} onChange={setZona} options={ZONA_OPTS} /></Field>
-          <Field label="Filas" className="sm:col-span-2">
-            <FilasPicker filas={s.filas.filter((f) => f.cuadro_id === cuadro).sort((a, b) => a.numero - b.numero)} value={filaIds} onChange={setFilaIds} />
+          <Field label="¿Dónde se aplica? Toca la mitad de cada fila (A izquierda, B derecha)" className="sm:col-span-2">
+            <MapaFilas filas={s.filas.filter((f) => f.cuadro_id === cuadro)} value={secciones} onChange={setSecciones} />
           </Field>
           <Field label="Producto" className="sm:col-span-2">
             <SimpleSelect value={prodId} onChange={elegirProducto} options={activos.map((p) => ({ value: p.id, label: `${p.nombre_comercial} · plazo ${p.plazo_seguridad_dias} días` }))} />

@@ -10,7 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { TIPO_LABEL, type Tarea, type TipoTarea } from "@/lib/data";
 import { nombreCuadro, useStore } from "@/lib/store";
 import { conflictosCosecha, esAtrasada, fmt } from "@/lib/logic";
-import { EstadoBadge, Field, FilasPicker, SimpleSelect, TipoChip, ZONA_OPTS, filasTexto, zonaLabel } from "./ov";
+import { EstadoBadge, Field, MapaFilas, SimpleSelect, TipoChip, filasDeSecciones, seccionesTexto } from "./ov";
 
 export function nuevaTarea(fecha: string): Tarea {
   return {
@@ -22,7 +22,8 @@ export function nuevaTarea(fecha: string): Tarea {
     fecha_fin: fecha,
     cuadro_id: null,
     fila_ids: [],
-    zona: "ambas",
+    secciones: [],
+    secciones_hechas: [],
     estado: "pendiente",
     responsable_id: null,
     recurrencia: "ninguna",
@@ -113,16 +114,13 @@ export function TaskDialog({ tarea, onClose }: { tarea: Tarea | null; onClose: (
             <Field label="Cuadro">
               <SimpleSelect
                 value={t.cuadro_id ?? "all"}
-                onChange={(v) => up({ cuadro_id: v === "all" ? null : v, fila_ids: [] })}
+                onChange={(v) => up({ cuadro_id: v === "all" ? null : v, fila_ids: [], secciones: [] })}
                 options={[{ value: "all", label: "Todo el campo" }, ...s.cuadros.map((c) => ({ value: c.id, label: c.nombre }))]}
               />
             </Field>
-            <Field label="Zona">
-              <SimpleSelect value={t.zona} onChange={(v) => up({ zona: v })} options={ZONA_OPTS} />
-            </Field>
             {t.cuadro_id && (
-              <Field label="Filas" className="sm:col-span-2">
-                <FilasPicker filas={filasCuadro} value={t.fila_ids} onChange={(ids) => up({ fila_ids: ids })} />
+              <Field label="¿Dónde? Toca la mitad de cada fila (A izquierda, B derecha)" className="sm:col-span-2">
+                <MapaFilas filas={filasCuadro} value={t.secciones} onChange={(secs) => up({ secciones: secs, fila_ids: filasDeSecciones(secs) })} />
               </Field>
             )}
             <Field label="Recurrencia">
@@ -152,7 +150,7 @@ export function TaskDialog({ tarea, onClose }: { tarea: Tarea | null; onClose: (
               <dd>{fmt(t.fecha_inicio)} – {fmt(t.fecha_fin)}</dd>
               <dt className="text-muted-foreground">Dónde</dt>
               <dd>
-                {nombreCuadro(s.cuadros, t.cuadro_id)} · {filasTexto(s.filas, t.fila_ids)} · {zonaLabel(t.zona)}
+                {nombreCuadro(s.cuadros, t.cuadro_id)} · {seccionesTexto(s.filas, t.secciones)}
               </dd>
             </dl>
           </div>
