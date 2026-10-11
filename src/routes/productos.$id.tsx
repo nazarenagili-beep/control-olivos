@@ -39,6 +39,7 @@ function Ficha() {
         <div className="ov-card space-y-2 p-5 text-sm">
           <h3 className="text-xl">Datos</h3>
           <p>{p.uso}</p>
+          {p.notas && <p className="status-warn rounded-md p-2">{p.notas}</p>}
           <p>Dosis recomendada: <strong>{num(p.dosis_recomendada)} {UNIDAD_DOSIS_LABEL[p.unidad_dosis]}</strong></p>
           <p>Plazo de seguridad: <strong>{p.plazo_seguridad_dias} días</strong></p>
           <p>Stock: {bajo ? <Status tone="danger">{num(p.stock_actual, 3)} {p.unidad_stock} (mín. {num(p.stock_minimo)})</Status> : <strong>{num(p.stock_actual, 3)} {p.unidad_stock}</strong>}</p>
