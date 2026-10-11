@@ -8,7 +8,7 @@ import { MapaFilas, TipoChip, haDeFila } from "./ov";
 export function CampoMapa() {
   const s = useStore();
   const [sel, setSel] = useState<string | null>(null);
-  const desde = addDays(s.hoy, -90);
+  const desde = addDays(s.hoy, -30);
   const cuadroDe = (k: string) => s.filas.find((f) => f.id === k.split(":")[0])?.cuadro_id;
   const cubre = (cuadro: string | null, secs: string[], k: string) =>
     (!cuadro || cuadro === cuadroDe(k)) && (secs.length === 0 || secs.includes(k));
@@ -27,7 +27,7 @@ export function CampoMapa() {
       <div className="ov-gradient h-1" />
       <div className="p-5">
         <h3 className="text-xl">Mapa del campo</h3>
-        <p className="mb-4 text-sm text-muted-foreground">Toca una mitad de fila para ver qué se ha hecho allí. En verde, las zonas con trabajos de los últimos 90 días.</p>
+        <p className="mb-4 text-sm text-muted-foreground">Toca una mitad de fila para ver qué se ha hecho allí. En verde, las zonas con trabajos de los últimos 30 días.</p>
         <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-[1fr_1fr_320px]">
           {s.cuadros.map((c) => (
             <div key={c.id}>

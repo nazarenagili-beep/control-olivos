@@ -113,11 +113,11 @@ function useStoreState() {
     setProductos((ps) => ps.map((p) => (p.id === producto_id ? { ...p, stock_actual: p.stock_actual + cantidad } : p)));
   };
 
-  const crearFilasMasivo = (cuadro_id: string, hasta: number, olivos: number) =>
+  const crearFilasMasivo = (cuadro_id: string, desde: number, hasta: number, olivos: number) =>
     setFilas((fs) => {
       const existentes = new Set(fs.filter((f) => f.cuadro_id === cuadro_id).map((f) => f.numero));
       const nuevas: Fila[] = [];
-      for (let n = 1; n <= hasta; n++)
+      for (let n = desde; n <= hasta; n++)
         if (!existentes.has(n)) nuevas.push({ id: nid("f"), cuadro_id, numero: n, cantidad_olivos: olivos, notas: "" });
       return [...fs, ...nuevas];
     });

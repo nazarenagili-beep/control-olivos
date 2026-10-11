@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EstadoBadge, SimpleSelect, TIPO_BG, TIPO_ICON, TipoChip, PageHeader, seccionesTexto } from "@/components/ov";
 import { TaskDialog, nuevaTarea } from "@/components/TaskDialog";
+import { MatrizTareas } from "@/components/MatrizTareas";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/calendario")({
@@ -25,7 +26,7 @@ function Calendario() {
   const [y, m] = s.hoy.split("-").map(Number);
   const [anio, setAnio] = useState(y);
   const [mes, setMes] = useState(m);
-  const [vista, setVista] = useState<"mes" | "lista">("mes");
+  const [vista, setVista] = useState<"filas" | "mes" | "lista">("filas");
   const [sel, setSel] = useState<Tarea | null>(null);
   const [fCuadro, setFCuadro] = useState("todos");
   const [fTipo, setFTipo] = useState("todos");
@@ -96,12 +97,12 @@ function Calendario() {
       />
       <div className="ov-card mb-4 flex flex-wrap items-center gap-3 p-3">
         <div className="flex items-center gap-1">
-          <Button variant="ghost" size="icon" onClick={() => mover(-1)} aria-label="Mes anterior"><ChevronLeft /></Button>
-          <h2 className="w-48 text-center text-2xl">{MESES[mes - 1]} {anio}</h2>
-          <Button variant="ghost" size="icon" onClick={() => mover(1)} aria-label="Mes siguiente"><ChevronRight /></Button>
+          <Button variant="ghost" size="icon" onClick={() => (vista === "filas" ? setAnio(anio - 1) : mover(-1))} aria-label="Mes anterior"><ChevronLeft /></Button>
+          <h2 className="w-48 text-center text-2xl">{vista === "filas" ? `Año ${anio}` : `${MESES[mes - 1]} ${anio}`}</h2>
+          <Button variant="ghost" size="icon" onClick={() => (vista === "filas" ? setAnio(anio + 1) : mover(1))} aria-label="Mes siguiente"><ChevronRight /></Button>
         </div>
-        <Tabs value={vista} onValueChange={(v) => setVista(v as "mes" | "lista")}>
-          <TabsList><TabsTrigger value="mes">Mes</TabsTrigger><TabsTrigger value="lista">Lista</TabsTrigger></TabsList>
+        <Tabs value={vista} onValueChange={(v) => setVista(v as "filas" | "mes" | "lista")}>
+          <TabsList><TabsTrigger value="filas">Por filas</TabsTrigger><TabsTrigger value="mes">Mes</TabsTrigger><TabsTrigger value="lista">Lista</TabsTrigger></TabsList>
         </Tabs>
         <div className="ml-auto grid w-full grid-cols-2 gap-2 md:w-auto md:grid-cols-4">
           <SimpleSelect value={fCuadro} onChange={setFCuadro} options={[{ value: "todos", label: "Todos los cuadros" }, { value: "campo", label: "Todo el campo" }, ...s.cuadros.map((c) => ({ value: c.id, label: c.nombre }))]} className="md:w-44" />
@@ -111,7 +112,9 @@ function Calendario() {
         </div>
       </div>
 
-      {vista === "mes" ? (
+      {vista === "filas" ? (
+        <MatrizTareas tareas={filtradas} anio={anio} onOpen={setSel} />
+      ) : vista === "mes" ? (
         <div className="ov-card overflow-hidden">
           <div className="grid grid-cols-7 bg-ov-beige-light text-center text-xs uppercase tracking-wider">
             {DIAS.map((d) => <div key={d} className="py-2">{d}</div>)}
