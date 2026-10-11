@@ -146,47 +146,129 @@ export const ZONA_OPTS: { value: Zona; label: string }[] = [
 ];
 export const zonaLabel = (z: Zona) => (z === "ambas" ? "A y B" : `Zona ${z}`);
 
-export function FilasPicker({
+export const MITAD = 17;
+export const sec = (filaId: string, z: "A" | "B") => `${filaId}:${z}`;
+export const seccionesDeFilas = (filas: Fila[]) => filas.flatMap((f) => [sec(f.id, "A"), sec(f.id, "B")]);
+export const filasDeSecciones = (secs: string[]) => [...new Set(secs.map((x) => x.split(":")[0]))];
+
+/**
+ * Diagrama del cuadro: cada fila dibujada con sus 34 olivos, mitad A (izquierda) y mitad B (derecha).
+ * modo "seleccion": elegir dónde se hace el trabajo (vacío = todo el cuadro).
+ * modo "progreso": marcar qué mitades ya están hechas (solo dentro de `disponibles`).
+ */
+export function MapaFilas({
   filas,
   value,
   onChange,
+  modo = "seleccion",
+  disponibles,
+  readOnly,
 }: {
   filas: Fila[];
   value: string[];
-  onChange: (ids: string[]) => void;
+  onChange?: (secs: string[]) => void;
+  modo?: "seleccion" | "progreso";
+  disponibles?: string[];
+  readOnly?: boolean;
 }) {
-  const todas = value.length === 0;
+  const orden = [...filas].sort((a, b) => a.numero - b.numero);
+  const todasSel = modo === "seleccion" && value.length === 0;
+  const permitido = (k: string) => !disponibles || disponibles.length === 0 || disponibles.includes(k);
+  const toggle = (k: string) => {
+    if (readOnly || !onChange || !permitido(k)) return;
+    onChange(value.includes(k) ? value.filter((x) => x !== k) : [...value, k]);
+  };
+  const setZona = (z: "A" | "B") => {
+    const ks = orden.map((f) => sec(f.id, z)).filter(permitido);
+    onChange?.([...new Set([...value.filter((x) => !x.endsWith(`:${z}`) || !ks.includes(x)), ...ks])]);
+  };
+  const total = orden.length * 2;
+  const hechas = modo === "progreso" ? value.length : 0;
+  const objetivo = modo === "progreso" ? (disponibles?.length ? disponibles.length : total) : 0;
+
   return (
-    <div className="space-y-2">
-      <label className="flex items-center gap-2 text-sm">
-        <Checkbox checked={todas} onCheckedChange={() => onChange([])} />
-        Todas las filas del cuadro
-      </label>
-      <div className="grid grid-cols-7 gap-1.5">
-        {filas.map((f) => {
-          const on = value.includes(f.id);
-          return (
-            <button
-              type="button"
-              key={f.id}
-              onClick={() => onChange(on ? value.filter((x) => x !== f.id) : [...value, f.id])}
-              className={cn(
-                "h-9 rounded-md border text-sm transition-colors",
-                on ? "border-ov-olive-light bg-ov-olive-light text-ov-white-broken" : "border-border bg-card hover:bg-ov-beige-light",
-              )}
-              aria-pressed={on}
-            >
-              {f.numero}
-            </button>
-          );
-        })}
+    <div className="space-y-3">
+      {!readOnly && (
+        <div className="flex flex-wrap items-center gap-2 text-sm">
+          {modo === "seleccion" ? (
+            <label className="mr-2 flex items-center gap-2">
+              <Checkbox checked={todasSel} onCheckedChange={() => onChange?.([])} /> Todo el cuadro
+            </label>
+          ) : (
+            <span className="mr-2 text-foreground">
+              Hecho {hechas} de {objetivo} mitades
+            </span>
+          )}
+          <button type="button" onClick={() => setZona("A")} className="h-9 rounded-md border border-border bg-card px-3 hover:bg-ov-beige-light">Toda la zona A</button>
+          <button type="button" onClick={() => setZona("B")} className="h-9 rounded-md border border-border bg-card px-3 hover:bg-ov-beige-light">Toda la zona B</button>
+          {modo === "progreso" && (
+            <button type="button" onClick={() => onChange?.((disponibles?.length ? disponibles : seccionesDeFilas(orden)).slice())} className="h-9 rounded-md border border-border bg-card px-3 hover:bg-ov-beige-light">Todo hecho</button>
+          )}
+          <button type="button" onClick={() => onChange?.([])} className="h-9 rounded-md px-3 text-ov-olive-light hover:underline">Limpiar</button>
+        </div>
+      )}
+      <div className="rounded-lg border border-border bg-ov-white-broken/60 p-3">
+        <div className="mb-2 grid grid-cols-[56px_1fr_1fr] gap-2 text-center text-xs uppercase tracking-wider text-muted-foreground">
+          <span />
+          <span>← Zona A (izquierda)</span>
+          <span>Zona B (derecha) →</span>
+        </div>
+        <div className="max-h-96 space-y-1 overflow-y-auto pr-1">
+          {orden.map((f) => (
+            <div key={f.id} className="grid grid-cols-[56px_1fr_1fr] items-center gap-2">
+              <span className="text-xs text-ov-stone">Fila {f.numero}</span>
+              {(["A", "B"] as const).map((z) => {
+                const k = sec(f.id, z);
+                const on = modo === "seleccion" ? todasSel || value.includes(k) : value.includes(k);
+                const off = !permitido(k);
+                const cls =
+                  modo === "progreso"
+                    ? on
+                      ? "status-ok"
+                      : off
+                        ? "border border-dashed border-border opacity-40"
+                        : "status-pending"
+                    : on
+                      ? "border border-ov-olive-light bg-ov-olive-light/15"
+                      : "border border-border bg-card";
+                return (
+                  <button
+                    type="button"
+                    key={z}
+                    disabled={off || readOnly}
+                    onClick={() => toggle(k)}
+                    aria-pressed={on}
+                    aria-label={`Fila ${f.numero}, zona ${z}${on ? (modo === "progreso" ? ", hecha" : ", seleccionada") : ""}`}
+                    className={cn("flex h-9 items-center justify-between gap-1 rounded-md px-2 transition-colors enabled:hover:ring-2 enabled:hover:ring-ov-gold/40", cls)}
+                  >
+                    <span className="text-xs font-medium">{z}</span>
+                    <span className="flex flex-1 justify-evenly">
+                      {Array.from({ length: MITAD }).map((_, i) => (
+                        <span key={i} className={cn("size-1.5 rounded-full", on ? "bg-ov-olive-light" : "bg-ov-stone/30")} />
+                      ))}
+                    </span>
+                    {modo === "progreso" && on && <CheckCircle2 className="size-3.5 shrink-0" />}
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   );
 }
 
-export function filasTexto(filas: Fila[], ids: string[]) {
-  if (!ids.length) return "Todas las filas";
-  const nums = filas.filter((f) => ids.includes(f.id)).map((f) => f.numero).sort((a, b) => a - b);
-  return `Filas ${nums.join(", ")}`;
+export function seccionesTexto(filas: Fila[], secs: string[]) {
+  if (!secs.length) return "Todo el cuadro";
+  const porFila = new Map<number, string[]>();
+  secs.forEach((k) => {
+    const [fid, z] = k.split(":");
+    const f = filas.find((x) => x.id === fid);
+    if (f) porFila.set(f.numero, [...(porFila.get(f.numero) ?? []), z]);
+  });
+  return [...porFila.entries()]
+    .sort((a, b) => a[0] - b[0])
+    .map(([n, zs]) => `F${n} ${zs.length === 2 ? "A+B" : zs[0]}`)
+    .join(", ");
 }
