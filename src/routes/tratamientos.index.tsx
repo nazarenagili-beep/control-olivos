@@ -1,106 +1,49 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState } from "react";
-import { Download, Plus, Trash2, Wind, CloudRain } from "lucide-react";
-import { toast } from "sonner";
 import { pageHead } from "@/lib/head";
-import { nombreCuadro, useStore } from "@/lib/store";
-import { fmt, num } from "@/lib/logic";
-import { UNIDAD_DOSIS_LABEL } from "@/lib/data";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { PageHeader, SimpleSelect, seccionesTexto } from "@/components/ov";
+import { useStore } from "@/lib/store";
+import { num } from "@/lib/logic";
+import { CATEGORIA_LABEL, UNIDAD_DOSIS_LABEL, type Categoria } from "@/lib/data";
+import { PageHeader } from "@/components/ov";
 
 export const Route = createFileRoute("/tratamientos/")({
-  head: () => pageHead("Tratamientos", "Registro de aplicaciones de productos en el olivar."),
+  head: () => pageHead("Tratamientos", "Guía de productos del olivar: para qué sirve cada uno, dosis y precauciones."),
   component: Tratamientos,
 });
 
+const ORDEN: Categoria[] = ["fungicida", "insecticida", "herbicida", "fertilizante", "otro"];
+
 function Tratamientos() {
   const s = useStore();
-  const [desde, setDesde] = useState("");
-  const [hasta, setHasta] = useState("");
-  const [cuadro, setCuadro] = useState("todos");
-  const [prod, setProd] = useState("todos");
-  const lista = s.aplicaciones
-    .filter((a) => (!desde || a.fecha >= desde) && (!hasta || a.fecha <= hasta) && (cuadro === "todos" || a.cuadro_id === cuadro) && (prod === "todos" || a.producto_id === prod))
-    .sort((a, b) => b.fecha.localeCompare(a.fecha));
-  const P = (id: string) => s.productos.find((p) => p.id === id);
-  const U = (id: string) => s.usuarios.find((u) => u.id === id)?.nombre ?? "—";
-
-  const exportar = () => {
-    const rows = [["Fecha", "Producto", "Cuadro", "Filas", "Zona", "Litros caldo", "Dosis", "Cantidad", "Aplicado por", "Libre cosecha"]];
-    lista.forEach((a) => rows.push([fmt(a.fecha), P(a.producto_id)?.nombre_comercial ?? "", nombreCuadro(s.cuadros, a.cuadro_id), seccionesTexto(s.filas, a.secciones), String(a.litros_caldo), `${a.dosis_usada} ${UNIDAD_DOSIS_LABEL[a.unidad_dosis]}`, `${a.cantidad_producto} ${P(a.producto_id)?.unidad_stock}`, U(a.aplicado_por), fmt(a.fecha_libre_cosecha)]));
-    const csv = rows.map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(";")).join("\n");
-    const url = URL.createObjectURL(new Blob(["\ufeff" + csv], { type: "text/csv" }));
-    const el = document.createElement("a");
-    el.href = url; el.download = "aplicaciones.csv"; el.click();
-  };
-
+  const activos = s.productos.filter((p) => p.activo);
   return (
     <>
-      <PageHeader
-        title="Tratamientos"
-        subtitle="Aplicaciones registradas"
-        actions={<>
-          {s.isAdmin && <Button variant="outline" onClick={exportar}><Download /> Exportar CSV</Button>}
-          <Button asChild><Link to="/tratamientos/nueva" search={{ tarea: undefined }}><Plus /> Nueva aplicación</Link></Button>
-        </>}
-      />
-      <div className="ov-card mb-4 grid gap-2 p-3 sm:grid-cols-4">
-        <Input type="date" value={desde} onChange={(e) => setDesde(e.target.value)} className="h-11" aria-label="Desde" />
-        <Input type="date" value={hasta} onChange={(e) => setHasta(e.target.value)} className="h-11" aria-label="Hasta" />
-        <SimpleSelect value={cuadro} onChange={setCuadro} options={[{ value: "todos", label: "Todos los cuadros" }, ...s.cuadros.map((c) => ({ value: c.id, label: c.nombre }))]} />
-        <SimpleSelect value={prod} onChange={setProd} options={[{ value: "todos", label: "Todos los productos" }, ...s.productos.map((p) => ({ value: p.id, label: p.nombre_comercial }))]} />
-      </div>
-      {lista.length === 0 ? (
-        <p className="ov-card p-8 text-center text-sm text-muted-foreground">No hay aplicaciones con estos filtros.</p>
-      ) : (
-        <>
-          <div className="ov-card hidden overflow-hidden md:block">
-            <Table>
-              <TableHeader className="bg-ov-beige-light">
-                <TableRow><TableHead>Fecha</TableHead><TableHead>Producto</TableHead><TableHead>Dónde</TableHead><TableHead>Caldo</TableHead><TableHead>Cantidad</TableHead><TableHead>Por</TableHead><TableHead>Libre cosecha</TableHead><TableHead /></TableRow>
-              </TableHeader>
-              <TableBody>
-                {lista.map((a) => (
-                  <TableRow key={a.id} className="hover:bg-ov-beige-light/50">
-                    <TableCell>{fmt(a.fecha)}</TableCell>
-                    <TableCell className="text-foreground">
-                      {P(a.producto_id)?.nombre_comercial}
-                      <div className="flex gap-2 text-xs text-muted-foreground">
-                        {a.viento === "fuerte" && <span className="text-warn flex items-center gap-1"><Wind className="size-3" />Viento fuerte</span>}
-                        {a.lluvia_prevista_24h && <span className="text-warn flex items-center gap-1"><CloudRain className="size-3" />Lluvia</span>}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-xs">{nombreCuadro(s.cuadros, a.cuadro_id)}<br />{seccionesTexto(s.filas, a.secciones)}</TableCell>
-                    <TableCell>{num(a.litros_caldo)} L</TableCell>
-                    <TableCell>{num(a.cantidad_producto, 3)} {P(a.producto_id)?.unidad_stock}</TableCell>
-                    <TableCell>{U(a.aplicado_por)}</TableCell>
-                    <TableCell>{fmt(a.fecha_libre_cosecha)}</TableCell>
-                    <TableCell>
-                      {s.isAdmin && (
-                        <Button variant="ghost" size="icon" aria-label="Borrar" onClick={() => { if (confirm("¿Borrar esta aplicación? Se devolverá el stock.")) { s.deleteAplicacion(a.id); toast.success("Aplicación borrada"); } }}>
-                          <Trash2 className="text-danger" />
-                        </Button>
-                      )}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </div>
-          <div className="space-y-2 md:hidden">
-            {lista.map((a) => (
-              <div key={a.id} className="ov-card p-4 text-sm">
-                <div className="flex justify-between text-foreground"><span>{P(a.producto_id)?.nombre_comercial}</span><span>{fmt(a.fecha)}</span></div>
-                <div className="text-xs text-muted-foreground">{nombreCuadro(s.cuadros, a.cuadro_id)} · {seccionesTexto(s.filas, a.secciones)}</div>
-                <div className="mt-1">{num(a.cantidad_producto, 3)} {P(a.producto_id)?.unidad_stock} en {num(a.litros_caldo)} L · libre {fmt(a.fecha_libre_cosecha)}</div>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
+      <PageHeader title="Tratamientos" subtitle="Guía de productos: para qué sirve cada uno. El control de lo hecho se lleva en el calendario." />
+      <p className="ov-card mb-6 p-4 text-sm text-muted-foreground">
+        <strong className="text-foreground">Días de espera:</strong> días que hay que esperar después de aplicar el producto antes de poder cosechar, para que la aceituna no tenga restos del producto.
+      </p>
+      {ORDEN.map((cat) => {
+        const ps = activos.filter((p) => p.categoria === cat);
+        if (!ps.length) return null;
+        return (
+          <section key={cat} className="mb-8">
+            <h2 className="mb-3 font-display text-2xl text-foreground">{CATEGORIA_LABEL[cat]}s</h2>
+            <div className="grid gap-3 md:grid-cols-2">
+              {ps.map((p) => (
+                <Link key={p.id} to="/productos/$id" params={{ id: p.id }} className="ov-card block p-4 hover:bg-ov-beige-light/40">
+                  <div className="flex items-baseline justify-between gap-2">
+                    <h3 className="text-lg font-bold text-foreground">{p.nombre_comercial}</h3>
+                    <span className="text-xs text-muted-foreground">{p.principio_activo}</span>
+                  </div>
+                  <p className="mt-1 text-sm"><span className="font-semibold">Para qué sirve:</span> {p.uso || "—"}</p>
+                  <p className="mt-1 text-sm"><span className="font-semibold">Dosis:</span> {num(p.dosis_recomendada)} {UNIDAD_DOSIS_LABEL[p.unidad_dosis]}</p>
+                  <p className="mt-1 text-sm"><span className="font-semibold">Días de espera antes de cosechar:</span> {p.plazo_seguridad_dias}</p>
+                  {p.notas && <p className="mt-1 text-sm text-muted-foreground"><span className="font-semibold text-foreground">Precauciones:</span> {p.notas}</p>}
+                </Link>
+              ))}
+            </div>
+          </section>
+        );
+      })}
     </>
   );
 }
