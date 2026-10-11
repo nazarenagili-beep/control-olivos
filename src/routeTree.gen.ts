@@ -12,8 +12,12 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculadoraRouteImport } from './routes/calculadora'
 import { Route as CalendarioRouteImport } from './routes/calendario'
+import { Route as ConfiguracionRouteImport } from './routes/configuracion'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PlazosRouteImport } from './routes/plazos'
+import { Route as StockRouteImport } from './routes/stock'
+import { Route as ProductosIndexRouteImport } from './routes/productos.index'
+import { Route as ProductosIdRouteImport } from './routes/productos.$id'
 import { Route as TratamientosIndexRouteImport } from './routes/tratamientos.index'
 import { Route as TratamientosNuevaRouteImport } from './routes/tratamientos.nueva'
 
@@ -32,6 +36,11 @@ const CalendarioRoute = CalendarioRouteImport.update({
   path: '/calendario',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ConfiguracionRoute = ConfiguracionRouteImport.update({
+  id: '/configuracion',
+  path: '/configuracion',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LoginRoute = LoginRouteImport.update({
   id: '/login',
   path: '/login',
@@ -40,6 +49,21 @@ const LoginRoute = LoginRouteImport.update({
 const PlazosRoute = PlazosRouteImport.update({
   id: '/plazos',
   path: '/plazos',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const StockRoute = StockRouteImport.update({
+  id: '/stock',
+  path: '/stock',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductosIndexRoute = ProductosIndexRouteImport.update({
+  id: '/productos/',
+  path: '/productos/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProductosIdRoute = ProductosIdRouteImport.update({
+  id: '/productos/$id',
+  path: '/productos/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TratamientosIndexRoute = TratamientosIndexRouteImport.update({
@@ -57,18 +81,26 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/calculadora': typeof CalculadoraRoute
   '/calendario': typeof CalendarioRoute
+  '/configuracion': typeof ConfiguracionRoute
   '/login': typeof LoginRoute
   '/plazos': typeof PlazosRoute
+  '/stock': typeof StockRoute
+  '/productos/$id': typeof ProductosIdRoute
   '/tratamientos/nueva': typeof TratamientosNuevaRoute
+  '/productos/': typeof ProductosIndexRoute
   '/tratamientos/': typeof TratamientosIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/calculadora': typeof CalculadoraRoute
   '/calendario': typeof CalendarioRoute
+  '/configuracion': typeof ConfiguracionRoute
   '/login': typeof LoginRoute
   '/plazos': typeof PlazosRoute
+  '/stock': typeof StockRoute
+  '/productos/$id': typeof ProductosIdRoute
   '/tratamientos/nueva': typeof TratamientosNuevaRoute
+  '/productos': typeof ProductosIndexRoute
   '/tratamientos': typeof TratamientosIndexRoute
 }
 export interface FileRoutesById {
@@ -76,9 +108,13 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/calculadora': typeof CalculadoraRoute
   '/calendario': typeof CalendarioRoute
+  '/configuracion': typeof ConfiguracionRoute
   '/login': typeof LoginRoute
   '/plazos': typeof PlazosRoute
+  '/stock': typeof StockRoute
+  '/productos/$id': typeof ProductosIdRoute
   '/tratamientos/nueva': typeof TratamientosNuevaRoute
+  '/productos/': typeof ProductosIndexRoute
   '/tratamientos/': typeof TratamientosIndexRoute
 }
 export interface FileRouteTypes {
@@ -87,27 +123,39 @@ export interface FileRouteTypes {
     | '/'
     | '/calculadora'
     | '/calendario'
+    | '/configuracion'
     | '/login'
     | '/plazos'
+    | '/stock'
+    | '/productos/$id'
     | '/tratamientos/nueva'
+    | '/productos/'
     | '/tratamientos/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
     | '/calculadora'
     | '/calendario'
+    | '/configuracion'
     | '/login'
     | '/plazos'
+    | '/stock'
+    | '/productos/$id'
     | '/tratamientos/nueva'
+    | '/productos'
     | '/tratamientos'
   id:
     | '__root__'
     | '/'
     | '/calculadora'
     | '/calendario'
+    | '/configuracion'
     | '/login'
     | '/plazos'
+    | '/stock'
+    | '/productos/$id'
     | '/tratamientos/nueva'
+    | '/productos/'
     | '/tratamientos/'
   fileRoutesById: FileRoutesById
 }
@@ -115,9 +163,13 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CalculadoraRoute: typeof CalculadoraRoute
   CalendarioRoute: typeof CalendarioRoute
+  ConfiguracionRoute: typeof ConfiguracionRoute
   LoginRoute: typeof LoginRoute
   PlazosRoute: typeof PlazosRoute
+  StockRoute: typeof StockRoute
+  ProductosIdRoute: typeof ProductosIdRoute
   TratamientosNuevaRoute: typeof TratamientosNuevaRoute
+  ProductosIndexRoute: typeof ProductosIndexRoute
   TratamientosIndexRoute: typeof TratamientosIndexRoute
 }
 
@@ -144,6 +196,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof CalendarioRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/configuracion': {
+      id: '/configuracion'
+      path: '/configuracion'
+      fullPath: '/configuracion'
+      preLoaderRoute: typeof ConfiguracionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/login': {
       id: '/login'
       path: '/login'
@@ -156,6 +215,27 @@ declare module '@tanstack/react-router' {
       path: '/plazos'
       fullPath: '/plazos'
       preLoaderRoute: typeof PlazosRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/stock': {
+      id: '/stock'
+      path: '/stock'
+      fullPath: '/stock'
+      preLoaderRoute: typeof StockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/productos/': {
+      id: '/productos/'
+      path: '/productos'
+      fullPath: '/productos/'
+      preLoaderRoute: typeof ProductosIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/productos/$id': {
+      id: '/productos/$id'
+      path: '/productos/$id'
+      fullPath: '/productos/$id'
+      preLoaderRoute: typeof ProductosIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/tratamientos/': {
@@ -179,9 +259,13 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CalculadoraRoute: CalculadoraRoute,
   CalendarioRoute: CalendarioRoute,
+  ConfiguracionRoute: ConfiguracionRoute,
   LoginRoute: LoginRoute,
   PlazosRoute: PlazosRoute,
+  StockRoute: StockRoute,
+  ProductosIdRoute: ProductosIdRoute,
   TratamientosNuevaRoute: TratamientosNuevaRoute,
+  ProductosIndexRoute: ProductosIndexRoute,
   TratamientosIndexRoute: TratamientosIndexRoute,
 }
 export const routeTree = rootRouteImport

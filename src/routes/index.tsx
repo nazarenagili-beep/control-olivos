@@ -5,7 +5,7 @@ import { pageHead } from "@/lib/head";
 import { nombreCuadro, useStore } from "@/lib/store";
 import { addDays, diffDays, esAtrasada, fmt, num, plazosPorFila } from "@/lib/logic";
 import type { Tarea } from "@/lib/data";
-import { EstadoBadge, PageHeader, TipoChip } from "@/components/ov";
+import { PageHeader, TipoChip } from "@/components/ov";
 import { TaskDialog } from "@/components/TaskDialog";
 
 export const Route = createFileRoute("/")({
@@ -114,9 +114,6 @@ function Inicio() {
         )}
       </div>
       {sel && <TaskDialog tarea={sel} onClose={() => setSel(null)} />}
-      <span className="hidden">
-        <EstadoBadge estado="pendiente" />
-      </span>
     </>
   );
 }
