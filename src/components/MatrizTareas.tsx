@@ -59,7 +59,7 @@ export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: 
           <tr>
             <th className="sticky left-0 z-10 border border-border bg-ov-gold/20 p-1 text-left font-normal text-muted-foreground">Mitad A | B de cada fila</th>
             {filas.map((f) => (
-              <th key={f.id} className="min-w-10 border border-border bg-ov-gold/20 px-1 py-0.5 font-normal">Fila {f.numero}</th>
+              <th key={f.id} className="min-w-10 whitespace-nowrap border border-border bg-ov-gold/20 px-1 py-0.5 font-normal">Fila {f.numero}</th>
             ))}
           </tr>
         </thead>
