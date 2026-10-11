@@ -1,4 +1,4 @@
-import { Fragment } from "react";
+import { Fragment, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store";
 import { esAtrasada, fmt } from "@/lib/logic";
@@ -15,6 +15,40 @@ const ESTACIONES = [
 /** Vista tipo planilla: tareas por estación (filas) × filas del olivar agrupadas por hectárea (columnas). */
 export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: number; onOpen: (t: Tarea) => void }) {
   const s = useStore();
+  // Arrastre: seleccionar varias mitades de fila de una misma tarea y marcarlas/desmarcarlas de una vez.
+  const [drag, setDrag] = useState<{ tareaId: string; marcar: boolean; secs: string[] } | null>(null);
+  const dragRef = useRef(drag);
+  dragRef.current = drag;
+  useEffect(() => {
+    if (!drag) return;
+    const move = (e: PointerEvent) => {
+      const el = (document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null)?.closest<HTMLElement>("[data-sec]");
+      const d = dragRef.current;
+      if (!el || !d || el.dataset.tarea !== d.tareaId) return;
+      const sec = el.dataset.sec!;
+      if (!d.secs.includes(sec)) setDrag({ ...d, secs: [...d.secs, sec] });
+    };
+    const up = () => {
+      const d = dragRef.current;
+      if (d) {
+        const t = s.tareas.find((x) => x.id === d.tareaId);
+        if (t) {
+          const set = new Set(t.secciones_hechas);
+          d.secs.forEach((k) => (d.marcar ? set.add(k) : set.delete(k)));
+          s.setSeccionesHechas(t.id, [...set]);
+        }
+      }
+      setDrag(null);
+    };
+    window.addEventListener("pointermove", move);
+    window.addEventListener("pointerup", up);
+    window.addEventListener("pointercancel", up);
+    return () => {
+      window.removeEventListener("pointermove", move);
+      window.removeEventListener("pointerup", up);
+      window.removeEventListener("pointercancel", up);
+    };
+  }, [drag !== null]); // eslint-disable-line react-hooks/exhaustive-deps
   const filas = [...s.filas].sort((a, b) => a.numero - b.numero);
   const has = [...new Set(filas.map((f) => haDeFila(f.numero)))];
   const delAnio = tareas.filter((t) => t.fecha_inicio.slice(0, 4) === String(anio));
@@ -90,10 +124,27 @@ export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: 
                     return (
                       <td key={f.id} className="border border-border p-0">
                         {c && (
-                          <button onClick={() => onOpen(t)} className="flex h-6 w-full" title={`Fila ${f.numero}: A ${c.a ? "hecha" : "pendiente"} · B ${c.b ? "hecha" : "pendiente"}`}>
-                            <span className={cn("flex-1 border-r border-card", c.a ? "bg-ov-olive-light" : "bg-ov-beige-light")} />
-                            <span className={cn("flex-1", c.b ? "bg-ov-olive-light" : "bg-ov-beige-light")} />
-                          </button>
+                          <div className="flex h-6 w-full select-none" style={{ touchAction: "none" }} title={`Fila ${f.numero}: A ${c.a ? "hecha" : "pendiente"} · B ${c.b ? "hecha" : "pendiente"}`}>
+                            {(["A", "B"] as const).map((z) => {
+                              const sec = `${f.id}:${z}`;
+                              const hecha = z === "A" ? c.a : c.b;
+                              const enSel = drag?.tareaId === t.id && drag.secs.includes(sec);
+                              const ver = enSel ? drag!.marcar : hecha;
+                              return (
+                                <span
+                                  key={z}
+                                  data-sec={sec}
+                                  data-tarea={t.id}
+                                  onPointerDown={(e) => {
+                                    if (t.estado === "hecha") return onOpen(t);
+                                    e.preventDefault();
+                                    setDrag({ tareaId: t.id, marcar: !hecha, secs: [sec] });
+                                  }}
+                                  className={cn("flex-1 cursor-pointer", z === "A" && "border-r border-card", ver ? "bg-ov-olive-light" : "bg-ov-beige-light", enSel && "ring-2 ring-inset ring-ov-olive-dark")}
+                                />
+                              );
+                            })}
+                          </div>
                         )}
                       </td>
                     );
@@ -107,6 +158,7 @@ export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: 
       <div className="flex flex-wrap gap-4 border-t border-border p-3 text-xs">
         <span className="flex items-center gap-1.5"><span className="h-3 w-5 bg-ov-olive-light" /> Hecho</span>
         <span className="flex items-center gap-1.5"><span className="h-3 w-5 bg-ov-beige-light" /> Pendiente</span>
+        <span>Tocá o arrastrá sobre las casillas de una tarea para marcar varias mitades como hechas (o desmarcarlas) de una vez. Tocá el nombre de la tarea para ver el detalle.</span>
         <span>Cada casilla tiene dos mitades: izquierda = zona A, derecha = zona B. Casilla vacía = la tarea no aplica a esa fila.</span>
       </div>
     </div>
