@@ -157,7 +157,7 @@ export function crearFilas(cuadroId: string, desde: number, hasta: number): Fila
 
 export const filasIniciales: Fila[] = [
   ...crearFilas("c-prod", 1, 3 * FILAS_POR_HA),
-  ...crearFilas("c-joven", 1, 2 * FILAS_POR_HA),
+  ...crearFilas("c-joven", 3 * FILAS_POR_HA + 1, 5 * FILAS_POR_HA),
 ];
 
 export const usuariosIniciales: Usuario[] = [
