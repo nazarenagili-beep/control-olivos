@@ -7,6 +7,7 @@ import { addDays, diffDays, esAtrasada, fmt, num, plazosPorFila } from "@/lib/lo
 import type { Tarea } from "@/lib/data";
 import { PageHeader, TipoChip } from "@/components/ov";
 import { TaskDialog } from "@/components/TaskDialog";
+import { CampoMapa } from "@/components/CampoMapa";
 
 export const Route = createFileRoute("/")({
   head: () => pageHead("Inicio", "Panel con tareas atrasadas, de la semana, stock bajo y plazos de seguridad."),
@@ -112,6 +113,9 @@ function Inicio() {
             )}
           </Card>
         )}
+      </div>
+      <div className="mt-6">
+        <CampoMapa />
       </div>
       {sel && <TaskDialog tarea={sel} onClose={() => setSel(null)} />}
     </>

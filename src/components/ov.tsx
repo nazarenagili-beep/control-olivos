@@ -15,7 +15,7 @@ import {
   Wheat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { ESTADO_LABEL, TIPO_LABEL, type EstadoTarea, type Fila, type TipoTarea, type Zona } from "@/lib/data";
+import { ESTADO_LABEL, FILAS_POR_HA, TIPO_LABEL, type EstadoTarea, type Fila, type TipoTarea, type Zona } from "@/lib/data";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -147,6 +147,7 @@ export const ZONA_OPTS: { value: Zona; label: string }[] = [
 export const zonaLabel = (z: Zona) => (z === "ambas" ? "A y B" : `Zona ${z}`);
 
 export const MITAD = 17;
+export const haDeFila = (n: number) => Math.ceil(n / FILAS_POR_HA);
 export const sec = (filaId: string, z: "A" | "B") => `${filaId}:${z}`;
 export const seccionesDeFilas = (filas: Fila[]) => filas.flatMap((f) => [sec(f.id, "A"), sec(f.id, "B")]);
 export const filasDeSecciones = (secs: string[]) => [...new Set(secs.map((x) => x.split(":")[0]))];
@@ -163,6 +164,8 @@ export function MapaFilas({
   modo = "seleccion",
   disponibles,
   readOnly,
+  onPick,
+  seleccionada,
 }: {
   filas: Fila[];
   value: string[];
@@ -170,11 +173,14 @@ export function MapaFilas({
   modo?: "seleccion" | "progreso";
   disponibles?: string[];
   readOnly?: boolean;
+  onPick?: (k: string) => void;
+  seleccionada?: string;
 }) {
   const orden = [...filas].sort((a, b) => a.numero - b.numero);
   const todasSel = modo === "seleccion" && value.length === 0;
   const permitido = (k: string) => !disponibles || disponibles.length === 0 || disponibles.includes(k);
   const toggle = (k: string) => {
+    if (onPick) return onPick(k);
     if (readOnly || !onChange || !permitido(k)) return;
     onChange(value.includes(k) ? value.filter((x) => x !== k) : [...value, k]);
   };
@@ -188,7 +194,7 @@ export function MapaFilas({
 
   return (
     <div className="space-y-3">
-      {!readOnly && (
+      {!readOnly && !onPick && (
         <div className="flex flex-wrap items-center gap-2 text-sm">
           {modo === "seleccion" ? (
             <label className="mr-2 flex items-center gap-2">
@@ -215,7 +221,15 @@ export function MapaFilas({
         </div>
         <div className="max-h-96 space-y-1 overflow-y-auto pr-1">
           {orden.map((f) => (
-            <div key={f.id} className="grid grid-cols-[56px_1fr_1fr] items-center gap-2">
+            <div key={f.id}>
+            {(f.numero - 1) % FILAS_POR_HA === 0 && (
+              <div className="mb-1 mt-3 flex items-center gap-2 first:mt-0">
+                <span className="font-display text-base font-medium text-foreground">Hectárea {haDeFila(f.numero)}</span>
+                <span className="text-xs text-muted-foreground">filas {f.numero}–{f.numero + FILAS_POR_HA - 1}</span>
+                <span className="h-px flex-1 bg-ov-gold/30" />
+              </div>
+            )}
+            <div className="grid grid-cols-[56px_1fr_1fr] items-center gap-2">
               <span className="text-xs text-ov-stone">Fila {f.numero}</span>
               {(["A", "B"] as const).map((z) => {
                 const k = sec(f.id, z);
@@ -235,11 +249,11 @@ export function MapaFilas({
                   <button
                     type="button"
                     key={z}
-                    disabled={off || readOnly}
+                    disabled={!onPick && (off || readOnly)}
                     onClick={() => toggle(k)}
                     aria-pressed={on}
                     aria-label={`Fila ${f.numero}, zona ${z}${on ? (modo === "progreso" ? ", hecha" : ", seleccionada") : ""}`}
-                    className={cn("flex h-9 items-center justify-between gap-1 rounded-md px-2 transition-colors enabled:hover:ring-2 enabled:hover:ring-ov-gold/40", cls)}
+                    className={cn("flex h-9 items-center justify-between gap-1 rounded-md px-2 transition-colors enabled:hover:ring-2 enabled:hover:ring-ov-gold/40", cls, seleccionada === k && "ring-2 ring-ov-gold")}
                   >
                     <span className="text-xs font-medium">{z}</span>
                     <span className="flex flex-1 justify-evenly">
@@ -251,6 +265,7 @@ export function MapaFilas({
                   </button>
                 );
               })}
+            </div>
             </div>
           ))}
         </div>
@@ -269,6 +284,6 @@ export function seccionesTexto(filas: Fila[], secs: string[]) {
   });
   return [...porFila.entries()]
     .sort((a, b) => a[0] - b[0])
-    .map(([n, zs]) => `F${n} ${zs.length === 2 ? "A+B" : zs[0]}`)
+    .map(([n, zs]) => `Ha${haDeFila(n)} F${n} ${zs.length === 2 ? "A+B" : zs[0]}`)
     .join(", ");
 }
