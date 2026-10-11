@@ -44,7 +44,8 @@ export interface Tarea {
   fecha_fin: string;
   cuadro_id: string | null;
   fila_ids: string[];
-  zona: Zona;
+  secciones: string[];
+  secciones_hechas: string[];
   estado: EstadoTarea;
   responsable_id: string | null;
   recurrencia: "ninguna" | "mensual" | "anual";
@@ -79,7 +80,7 @@ export interface Aplicacion {
   producto_id: string;
   cuadro_id: string;
   fila_ids: string[];
-  zona: Zona;
+  secciones: string[];
   litros_caldo: number;
   dosis_usada: number;
   unidad_dosis: UnidadDosis;
@@ -173,8 +174,8 @@ export const productosIniciales: Producto[] = [
 
 const pf = (n: number) => `c-prod-f${n}`;
 export const aplicacionesIniciales: Aplicacion[] = [
-  { id: "a-1", fecha: "2026-10-05", producto_id: "p-cobre", cuadro_id: "c-prod", fila_ids: [1, 2, 3, 4, 5, 6, 7].map(pf), zona: "ambas", litros_caldo: 200, dosis_usada: 300, unidad_dosis: "g_por_100L", cantidad_producto: 0.6, aplicado_por: "u-juan", tarea_id: null, temperatura_c: 17, viento: "calmo", lluvia_prevista_24h: false, fecha_libre_cosecha: "2026-10-20", notas: "Post poda, primera tanda." },
-  { id: "a-2", fecha: "2026-10-08", producto_id: "p-spinosad", cuadro_id: "c-prod", fila_ids: [8, 9, 10].map(pf), zona: "A", litros_caldo: 32, dosis_usada: 25, unidad_dosis: "ml_por_100L", cantidad_producto: 0.008, aplicado_por: "u-juan", tarea_id: null, temperatura_c: 20, viento: "moderado", lluvia_prevista_24h: false, fecha_libre_cosecha: "2026-10-15", notas: "" },
+  { id: "a-1", fecha: "2026-10-05", producto_id: "p-cobre", cuadro_id: "c-prod", fila_ids: [1, 2, 3, 4, 5, 6, 7].map(pf), secciones: [1, 2, 3, 4, 5, 6, 7].flatMap((n) => [`${pf(n)}:A`, `${pf(n)}:B`]), litros_caldo: 200, dosis_usada: 300, unidad_dosis: "g_por_100L", cantidad_producto: 0.6, aplicado_por: "u-juan", tarea_id: null, temperatura_c: 17, viento: "calmo", lluvia_prevista_24h: false, fecha_libre_cosecha: "2026-10-20", notas: "Post poda, primera tanda." },
+  { id: "a-2", fecha: "2026-10-08", producto_id: "p-spinosad", cuadro_id: "c-prod", fila_ids: [8, 9, 10].map(pf), secciones: [8, 9, 10].map((n) => `${pf(n)}:A`), litros_caldo: 32, dosis_usada: 25, unidad_dosis: "ml_por_100L", cantidad_producto: 0.008, aplicado_por: "u-juan", tarea_id: null, temperatura_c: 20, viento: "moderado", lluvia_prevista_24h: false, fecha_libre_cosecha: "2026-10-15", notas: "" },
 ];
 
 export const movimientosIniciales: Movimiento[] = [
@@ -232,7 +233,8 @@ export function generarPlanAnual(anio: number, hoy: string): Tarea[] {
       fecha_fin: fin,
       cuadro_id: p.cuadro,
       fila_ids: [],
-      zona: "ambas",
+      secciones: [],
+      secciones_hechas: [],
       estado: fin < "2026-09-01" && fin < hoy ? "hecha" : "pendiente",
       responsable_id: null,
       recurrencia: "anual",
@@ -253,7 +255,8 @@ export function tareaElectrico(anio: number, mes: number): Tarea {
     fecha_fin: iso(anio, mes, 5),
     cuadro_id: null,
     fila_ids: [],
-    zona: "ambas",
+    secciones: [],
+    secciones_hechas: [],
     estado: "pendiente",
     responsable_id: "u-juan",
     recurrencia: "mensual",

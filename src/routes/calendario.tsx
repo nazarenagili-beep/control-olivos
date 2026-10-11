@@ -7,7 +7,7 @@ import { conflictosCosecha, esAtrasada, fmt } from "@/lib/logic";
 import { ESTADO_LABEL, TIPO_LABEL, type EstadoTarea, type Tarea, type TipoTarea } from "@/lib/data";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { EstadoBadge, SimpleSelect, TIPO_BG, TIPO_ICON, TipoChip, PageHeader, filasTexto, zonaLabel } from "@/components/ov";
+import { EstadoBadge, SimpleSelect, TIPO_BG, TIPO_ICON, TipoChip, PageHeader, seccionesTexto } from "@/components/ov";
 import { TaskDialog, nuevaTarea } from "@/components/TaskDialog";
 import { cn } from "@/lib/utils";
 
@@ -144,7 +144,7 @@ function Calendario() {
                   {t.titulo}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {nombreCuadro(s.cuadros, t.cuadro_id)} · {filasTexto(s.filas, t.fila_ids)} · {zonaLabel(t.zona)}
+                  {nombreCuadro(s.cuadros, t.cuadro_id)} · {seccionesTexto(s.filas, t.secciones)}
                 </div>
               </div>
               <span className="text-sm">{fmt(t.fecha_inicio)} – {fmt(t.fecha_fin)}</span>

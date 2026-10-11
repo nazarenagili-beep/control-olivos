@@ -7,7 +7,7 @@ import { nombreCuadro, useStore } from "@/lib/store";
 import { ars, fmt, num } from "@/lib/logic";
 import { CATEGORIA_LABEL, UNIDAD_DOSIS_LABEL } from "@/lib/data";
 import { Button } from "@/components/ui/button";
-import { PageHeader, Status, filasTexto } from "@/components/ov";
+import { PageHeader, Status, seccionesTexto } from "@/components/ov";
 import { ProductoDialog } from "@/components/ProductoDialog";
 
 export const Route = createFileRoute("/productos/$id")({
@@ -50,7 +50,7 @@ function Ficha() {
             <ul className="divide-y divide-border text-sm">
               {apps.map((a) => (
                 <li key={a.id} className="flex flex-wrap justify-between gap-2 py-2">
-                  <span>{fmt(a.fecha)} · {nombreCuadro(s.cuadros, a.cuadro_id)} · {filasTexto(s.filas, a.fila_ids)}</span>
+                  <span>{fmt(a.fecha)} · {nombreCuadro(s.cuadros, a.cuadro_id)} · {seccionesTexto(s.filas, a.secciones)}</span>
                   <span>{num(a.cantidad_producto, 3)} {p.unidad_stock}</span>
                 </li>
               ))}

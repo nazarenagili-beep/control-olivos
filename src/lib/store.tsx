@@ -70,12 +70,16 @@ function useStoreState() {
               completada_por: undefined,
               nota_cierre: undefined,
               foto_nombre: undefined,
+              secciones_hechas: [],
             },
           ];
         }
       }
       return next;
     });
+
+  const setSeccionesHechas = (id: string, secs: string[]) =>
+    setTareas((ts) => ts.map((t) => (t.id === id ? { ...t, secciones_hechas: secs, estado: t.estado === "pendiente" && secs.length ? "en_curso" : t.estado } : t)));
 
   const addAplicacion = (a: Omit<Aplicacion, "id" | "fecha_libre_cosecha">) => {
     const prod = productos.find((p) => p.id === a.producto_id)!;
@@ -135,7 +139,7 @@ function useStoreState() {
 
   return {
     hoy, usuarios, user, isAdmin, setCurrentUserId, cuadros, setCuadros, filas, setFilas, tareas, productos, aplicaciones,
-    movimientos, config, setConfig, saveTarea, deleteTarea, setEstadoTarea, addAplicacion, deleteAplicacion, saveProducto,
+    movimientos, config, setConfig, saveTarea, deleteTarea, setEstadoTarea, setSeccionesHechas, addAplicacion, deleteAplicacion, saveProducto,
     addCompra, addAjuste, crearFilasMasivo, regenerarPlan, saveUsuario,
   };
 }
