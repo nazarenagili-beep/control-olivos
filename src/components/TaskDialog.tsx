@@ -38,11 +38,13 @@ export function TaskDialog({ tarea, onClose }: { tarea: Tarea | null; onClose: (
   const [nota, setNota] = useState("");
   const [foto, setFoto] = useState<string>("");
   const [confirmo, setConfirmo] = useState(false);
+  const [hechas, setHechas] = useState<string[]>(tarea?.secciones_hechas ?? []);
   useEffect(() => {
     setT(tarea);
     setNota(tarea?.nota_cierre ?? "");
     setFoto("");
     setConfirmo(false);
+    setHechas(tarea?.secciones_hechas ?? []);
   }, [tarea]);
 
   const conflictos = useMemo(
@@ -70,6 +72,7 @@ export function TaskDialog({ tarea, onClose }: { tarea: Tarea | null; onClose: (
     if (conflictos.length && !confirmo) return toast.error("Hay filas dentro del plazo de seguridad.");
     s.saveTarea({
       ...t,
+      secciones_hechas: hechas,
       ...(conflictos.length ? { plazo_confirmado_por: s.user.id, plazo_confirmado_en: new Date().toISOString() } : {}),
     });
     toast.success("Tarea guardada");
@@ -171,6 +174,35 @@ export function TaskDialog({ tarea, onClose }: { tarea: Tarea | null; onClose: (
             ) : (
               <p>No puedes guardar esta cosecha. Consulta con la administradora.</p>
             )}
+          </div>
+        )}
+
+        {t.id && (
+          <div className="space-y-3">
+            <h3 className="text-lg">Avance por fila y zona</h3>
+            <p className="text-xs text-muted-foreground">Toca cada mitad de fila cuando el trabajo esté hecho. Se guarda al momento.</p>
+            {(t.cuadro_id ? s.cuadros.filter((c) => c.id === t.cuadro_id) : s.cuadros).map((c) => {
+              const fs = s.filas.filter((f) => f.cuadro_id === c.id);
+              const ids = new Set(fs.map((f) => f.id));
+              const mine = (x: string) => ids.has(x.split(":")[0]);
+              return (
+                <div key={c.id} className="space-y-1">
+                  {!t.cuadro_id && <p className="text-sm text-foreground">{c.nombre}</p>}
+                  <MapaFilas
+                    modo="progreso"
+                    filas={fs}
+                    disponibles={t.secciones.filter(mine)}
+                    value={hechas.filter(mine)}
+                    readOnly={!puedeCerrar || t.estado === "hecha"}
+                    onChange={(v) => {
+                      const n = [...hechas.filter((x) => !mine(x)), ...v];
+                      setHechas(n);
+                      s.setSeccionesHechas(t.id, n);
+                    }}
+                  />
+                </div>
+              );
+            })}
           </div>
         )}
 
