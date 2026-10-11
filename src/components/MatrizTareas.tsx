@@ -23,15 +23,17 @@ export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: 
     const vistos = new Set<string>();
     return ts.filter((t) => (vistos.has(t.titulo + t.cuadro_id) ? false : (vistos.add(t.titulo + t.cuadro_id), true)));
   };
+  const largo = (t: Tarea) => t.recurrencia === "ninguna" && t.fecha_fin.slice(5) === "12-31" && t.fecha_inicio.slice(5) === "01-01";
   const grupos = [
     ...ESTACIONES.map((e) => ({
       label: e.label,
       tareas: delAnio
-        .filter((t) => t.recurrencia !== "mensual" && e.meses.includes(Number(t.fecha_inicio.slice(5, 7))))
+        .filter((t) => t.recurrencia !== "mensual" && !largo(t) && e.meses.includes(Number(t.fecha_inicio.slice(5, 7))))
         .sort((a, b) => a.fecha_inicio.localeCompare(b.fecha_inicio)),
       tono: "bg-ov-stone/25",
     })),
-    { label: "Tareas periódicas / control", tareas: unicos(mensuales.filter((t) => t.estado !== "hecha")).slice(0, 10), tono: "bg-ov-olive-light/25" },
+    { label: "Tareas diarias / control", tareas: unicos(mensuales.filter((t) => t.estado !== "hecha")).slice(0, 10), tono: "bg-ov-olive-light/25" },
+    { label: "Tareas puntuales", tareas: delAnio.filter(largo), tono: "bg-t-cosecha/20" },
   ];
 
   const celda = (t: Tarea, f: Fila) => {

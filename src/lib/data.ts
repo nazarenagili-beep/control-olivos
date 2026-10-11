@@ -213,19 +213,44 @@ interface PlanBase {
   sigAnio?: boolean;
 }
 const PLAN: PlanBase[] = [
-  { key: "madur", titulo: "Seguimiento de maduración", tipo: "control", desc: "Seguimiento de maduración de la aceituna para fijar fecha de cosecha.", ini: [3, 1], fin: [3, 31], cuadro: null },
-  { key: "cosecha", titulo: "Cosecha manual", tipo: "cosecha", desc: "Moler en menos de 24 h desde la recolección.", ini: [4, 1], fin: [6, 15], cuadro: "c-prod" },
-  { key: "cobre-cos", titulo: "Cobre post cosecha", tipo: "tratamiento", desc: "Cobre después de cosechar, para cerrar las heridas de la recolección.", ini: [5, 15], fin: [6, 30], cuadro: "c-prod" },
-  { key: "suelo", titulo: "Análisis de suelo", tipo: "control", desc: "Análisis de suelo.", ini: [7, 1], fin: [7, 31], cuadro: null },
-  { key: "herram", titulo: "Mantenimiento de equipos", tipo: "mantenimiento", desc: "Herramientas, prensa, capachos y equipo de pulverización.", ini: [7, 1], fin: [7, 31], cuadro: null },
-  { key: "poda-p", titulo: "Poda", tipo: "poda", desc: "Poda después de las heladas fuertes.", ini: [8, 20], fin: [9, 30], cuadro: "c-prod" },
-  { key: "poda-j", titulo: "Poda de formación", tipo: "poda", desc: "Solo poda de formación.", ini: [8, 20], fin: [9, 30], cuadro: "c-joven" },
-  { key: "abonado", titulo: "Abonado de primavera", tipo: "abonado", desc: "Abonado de primavera.", ini: [9, 15], fin: [10, 31], cuadro: null },
-  { key: "cobre-poda", titulo: "Cobre post poda", tipo: "tratamiento", desc: "Cobre después de la poda.", ini: [10, 1], fin: [10, 15], cuadro: null },
-  { key: "reponer", titulo: "Reponer olivos muertos", tipo: "mantenimiento", desc: "Reponer olivos muertos.", ini: [10, 1], fin: [10, 31], cuadro: "c-joven" },
-  { key: "flor", titulo: "Control de floración y plagas", tipo: "control", desc: "Floración y plagas.", ini: [10, 15], fin: [11, 30], cuadro: null },
-  { key: "riego", titulo: "Riego de verano", tipo: "riego", desc: "Riego según lluvias. Prioridad cuadro joven.", ini: [11, 1], fin: [2, 28], cuadro: null, sigAnio: true },
+  // Verano (dic, ene, feb)
+  { key: "v-foliar", titulo: "Fertilizante foliar (nutrientes)", tipo: "abonado", desc: "Fertilizante foliar.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
+  { key: "v-polillas", titulo: "Fumigación de polillas", tipo: "tratamiento", desc: "Fumigación contra polillas.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
+  { key: "v-brotes", titulo: "Quitar brotes (fortalecer planta)", tipo: "poda", desc: "Quitar brotes para fortalecer la planta.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
+  { key: "v-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
+  // Otoño (mar, abr, may)
+  { key: "o-brotes", titulo: "Quitar brotes", tipo: "poda", desc: "Quitar brotes.", ini: [3, 1], fin: [5, 31], cuadro: null },
+  { key: "o-prep", titulo: "Preparación de cosecha", tipo: "control", desc: "Seguimiento de maduración y preparación de la cosecha.", ini: [3, 1], fin: [3, 31], cuadro: "c-prod" },
+  { key: "o-cosecha", titulo: "Cosecha", tipo: "cosecha", desc: "Cosecha manual. Moler en menos de 24 h desde la recolección.", ini: [4, 1], fin: [5, 31], cuadro: "c-prod" },
+  { key: "o-abono", titulo: "Fertilizar con abono", tipo: "abonado", desc: "Fertilizar con abono.", ini: [3, 1], fin: [5, 31], cuadro: null },
+  { key: "o-helada", titulo: "Antihelada", tipo: "tratamiento", desc: "Protección antihelada.", ini: [5, 1], fin: [5, 31], cuadro: null },
+  { key: "o-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas.", ini: [3, 1], fin: [5, 31], cuadro: null },
+  // Invierno (jun, jul, ago)
+  { key: "i-poda", titulo: "Poda de formación (ramas muertas y débiles)", tipo: "poda", desc: "Quitar ramas muertas y débiles.", ini: [6, 1], fin: [8, 31], cuadro: null },
+  { key: "i-trat", titulo: "Tratamiento previsión de enfermedades", tipo: "tratamiento", desc: "Tratamiento preventivo (cobre tras cosecha y poda).", ini: [6, 1], fin: [8, 31], cuadro: null },
+  { key: "i-cosecha", titulo: "Cosecha", tipo: "cosecha", desc: "Final de cosecha. Moler en menos de 24 h desde la recolección.", ini: [6, 1], fin: [6, 30], cuadro: "c-prod" },
+  { key: "i-aceite", titulo: "Producción aceite", tipo: "otro", desc: "Producción de aceite.", ini: [6, 1], fin: [8, 31], cuadro: "c-prod" },
+  // Primavera (sep, oct, nov)
+  { key: "p-foliar", titulo: "Fertilizante foliar (nutrientes)", tipo: "abonado", desc: "Fertilizante foliar.", ini: [9, 1], fin: [11, 30], cuadro: null },
+  { key: "p-yuyos", titulo: "Fumigación (mata yuyos)", tipo: "tratamiento", desc: "Herbicida contra yuyos y sorgo de Alepo.", ini: [9, 1], fin: [11, 30], cuadro: null },
+  { key: "p-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas.", ini: [9, 1], fin: [11, 30], cuadro: null },
+  { key: "p-poda", titulo: "Poda de producción", tipo: "poda", desc: "Poda de producción.", ini: [9, 1], fin: [9, 30], cuadro: "c-prod" },
+  { key: "p-aceite", titulo: "Producción aceite", tipo: "otro", desc: "Producción de aceite.", ini: [9, 1], fin: [9, 30], cuadro: "c-prod" },
+  { key: "p-plantar", titulo: "Plantar plantas que están muertas", tipo: "mantenimiento", desc: "Reponer olivos muertos.", ini: [10, 1], fin: [11, 30], cuadro: null },
 ];
+
+const DIARIAS: { key: string; titulo: string; tipo: TipoTarea; desc: string; cuadro: string | null }[] = [
+  { key: "atar", titulo: "Atar plantas", tipo: "control", desc: "Atar plantas.", cuadro: "c-joven" },
+  { key: "tutores", titulo: "Enderezar plantas y tutores", tipo: "control", desc: "Enderezar plantas y tutores.", cuadro: "c-joven" },
+  { key: "riego", titulo: "Controlar el riego (programas y mangueras)", tipo: "riego", desc: "Cambiar programas y revisar mangueras.", cuadro: null },
+  { key: "limpio", titulo: "Mantener el terreno limpio (alrededor de las plantas)", tipo: "mantenimiento", desc: "Limpiar alrededor de las plantas.", cuadro: null },
+  { key: "sanas", titulo: "Controlar que las plantas estén bien o enfermas", tipo: "control", desc: "Revisar el estado sanitario.", cuadro: null },
+];
+const PUNTUALES = [
+  { key: "esquejes", titulo: "Realizar esquejes", tipo: "otro" as TipoTarea },
+  { key: "viento", titulo: "Plantar árboles para parar el viento", tipo: "mantenimiento" as TipoTarea },
+];
+
 
 const iso = (y: number, m: number, d: number) =>
   `${y}-${String(m).padStart(2, "0")}-${String(d).padStart(2, "0")}`;
@@ -273,14 +298,28 @@ export function tareaElectrico(anio: number, mes: number): Tarea {
   };
 }
 
+export function tareasDiarias(anio: number, mes: number): Tarea[] {
+  const fin = iso(anio, mes, new Date(Date.UTC(anio, mes, 0)).getUTCDate());
+  return DIARIAS.map((d) => ({
+    id: `plan-${anio}-${mes}-${d.key}`, titulo: d.titulo, tipo: d.tipo, descripcion: d.desc, fecha_inicio: iso(anio, mes, 1), fecha_fin: fin,
+    cuadro_id: d.cuadro, fila_ids: [], secciones: [], secciones_hechas: [], estado: "pendiente", responsable_id: "u-juan", recurrencia: "mensual", origen: "plan_anual",
+  }));
+}
+
 export function tareasIniciales(hoy: string): Tarea[] {
-  const t = [...generarPlanAnual(2026, hoy), ...generarPlanAnual(2027, hoy), tareaElectrico(2026, 10)];
-  const abon = t.find((x) => x.id === "plan-2026-abonado");
-  if (abon) {
-    abon.estado = "en_curso";
-    abon.responsable_id = "u-juan";
-  }
-  const cobre = t.find((x) => x.id === "plan-2026-cobre-poda");
-  if (cobre) cobre.responsable_id = "u-juan";
+  const t = [
+    ...generarPlanAnual(2026, hoy),
+    ...generarPlanAnual(2027, hoy),
+    tareaElectrico(2026, 10),
+    ...tareasDiarias(2026, 10),
+    ...PUNTUALES.map<Tarea>((p) => ({
+      id: `punt-${p.key}`, titulo: p.titulo, tipo: p.tipo, descripcion: "Tarea puntual.", fecha_inicio: "2026-01-01", fecha_fin: "2026-12-31",
+      cuadro_id: null, fila_ids: [], secciones: [], secciones_hechas: [], estado: "pendiente", responsable_id: null, recurrencia: "ninguna", origen: "manual",
+    })),
+  ];
+  const foliar = t.find((x) => x.id === "plan-2026-p-foliar");
+  if (foliar) { foliar.estado = "en_curso"; foliar.responsable_id = "u-juan"; foliar.secciones_hechas = ["c-prod-f1:A", "c-prod-f1:B", "c-prod-f2:A", "c-prod-f2:B", "c-prod-f3:A"]; }
+  const yuyos = t.find((x) => x.id === "plan-2026-p-yuyos");
+  if (yuyos) yuyos.responsable_id = "u-juan";
   return t;
 }

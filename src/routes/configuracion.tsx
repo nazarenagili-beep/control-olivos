@@ -35,13 +35,16 @@ function Config() {
             return (
               <div key={c.id} className="ov-card space-y-3 p-5">
                 <h3 className="text-2xl">{c.nombre}</h3>
-                <p className="text-sm">{c.hectareas} ha · {fs.length} filas · {fs.reduce((a, f) => a + (f.cantidad_olivos ?? 0), 0)} olivos</p>
+                <p className="text-sm">{c.hectareas} ha · filas {Math.min(...fs.map((f) => f.numero))}–{Math.max(...fs.map((f) => f.numero))} · {fs.length} filas · {fs.reduce((a, f) => a + (f.cantidad_olivos ?? 0), 0)} olivos</p>
                 <p className="text-xs text-muted-foreground">Cada fila se divide en zona A (izquierda) y zona B (derecha).</p>
                 <div className="flex items-end gap-2">
-                  <Field label="Crear filas de la 1 a la N" className="flex-1">
+                  <Field label="Desde la fila" className="flex-1">
+                    <Input type="number" min={1} className="h-11" value={hasta[c.id + "d"] ?? ""} onChange={(e) => setHasta({ ...hasta, [c.id + "d"]: e.target.value })} />
+                  </Field>
+                  <Field label="Hasta la fila" className="flex-1">
                     <Input type="number" min={1} className="h-11" value={hasta[c.id] ?? ""} onChange={(e) => setHasta({ ...hasta, [c.id]: e.target.value })} />
                   </Field>
-                  <Button onClick={() => { const n = Number(hasta[c.id]); if (n > 0) { s.crearFilasMasivo(c.id, n, OLIVOS_POR_FILA); toast.success("Filas creadas"); } }}>Crear</Button>
+                  <Button onClick={() => { const n = Number(hasta[c.id]); const d = Number(hasta[c.id + "d"] || 1); if (n >= d) { s.crearFilasMasivo(c.id, d, n, OLIVOS_POR_FILA); toast.success("Filas creadas"); } }}>Crear</Button>
                 </div>
               </div>
             );
