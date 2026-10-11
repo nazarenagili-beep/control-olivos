@@ -123,8 +123,7 @@ export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: 
                     const c = celda(t, f);
                     return (
                       <td key={f.id} className="border border-border p-0">
-                        {c && (
-                          {(() => {
+                        {c && (() => {
                             const hecha = c.a && c.b;
                             const enSel = drag?.tareaId === t.id && drag.secs.includes(f.id);
                             const ver = enSel ? drag!.marcar : hecha;
@@ -143,7 +142,6 @@ export function MatrizTareas({ tareas, anio, onOpen }: { tareas: Tarea[]; anio: 
                               />
                             );
                           })()}
-                        )}
                       </td>
                     );
                   })}
