@@ -1,19 +1,20 @@
 import { useState } from "react";
 import { FlaskConical } from "lucide-react";
 import { useStore } from "@/lib/store";
-import { fmt, num } from "@/lib/logic";
+import { addDays, fmt, num } from "@/lib/logic";
 import type { Aplicacion, Tarea } from "@/lib/data";
 import { MapaFilas, TipoChip, haDeFila } from "./ov";
 
 export function CampoMapa() {
   const s = useStore();
   const [sel, setSel] = useState<string | null>(null);
+  const desde = addDays(s.hoy, -90);
   const cuadroDe = (k: string) => s.filas.find((f) => f.id === k.split(":")[0])?.cuadro_id;
   const cubre = (cuadro: string | null, secs: string[], k: string) =>
     (!cuadro || cuadro === cuadroDe(k)) && (secs.length === 0 || secs.includes(k));
   const tareasEn = (k: string): Tarea[] =>
-    s.tareas.filter((t) => (t.estado === "hecha" && cubre(t.cuadro_id, t.secciones, k)) || t.secciones_hechas.includes(k));
-  const appsEn = (k: string): Aplicacion[] => s.aplicaciones.filter((a) => cubre(a.cuadro_id, a.secciones, k));
+    s.tareas.filter((t) => (t.estado === "hecha" && (t.completada_en ?? t.fecha_fin).slice(0, 10) >= desde && cubre(t.cuadro_id, t.secciones, k)) || t.secciones_hechas.includes(k));
+  const appsEn = (k: string): Aplicacion[] => s.aplicaciones.filter((a) => a.fecha >= desde && cubre(a.cuadro_id, a.secciones, k));
   const conHistoria = s.filas.flatMap((f) => [`${f.id}:A`, `${f.id}:B`]).filter((k) => tareasEn(k).length || appsEn(k).length);
 
   const fila = sel ? s.filas.find((f) => f.id === sel.split(":")[0]) : null;
@@ -26,8 +27,8 @@ export function CampoMapa() {
       <div className="ov-gradient h-1" />
       <div className="p-5">
         <h3 className="text-xl">Mapa del campo</h3>
-        <p className="mb-4 text-sm text-muted-foreground">Toca una mitad de fila para ver qué se ha hecho allí. En verde, las zonas con trabajos registrados.</p>
-        <div className="grid gap-6 xl:grid-cols-[1fr_1fr_320px]">
+        <p className="mb-4 text-sm text-muted-foreground">Toca una mitad de fila para ver qué se ha hecho allí. En verde, las zonas con trabajos de los últimos 90 días.</p>
+        <div className="grid gap-6 lg:grid-cols-2 2xl:grid-cols-[1fr_1fr_320px]">
           {s.cuadros.map((c) => (
             <div key={c.id}>
               <p className="mb-2 text-sm text-foreground">{c.nombre} · {c.hectareas} ha</p>
@@ -40,7 +41,7 @@ export function CampoMapa() {
               />
             </div>
           ))}
-          <aside className="rounded-lg border border-border p-4 text-sm xl:sticky xl:top-20 xl:self-start">
+          <aside className="rounded-lg border border-border p-4 text-sm lg:col-span-2 2xl:col-span-1 2xl:sticky 2xl:top-20 2xl:self-start">
             {!sel || !fila ? (
               <p className="text-muted-foreground">Elige una zona en el mapa.</p>
             ) : (
