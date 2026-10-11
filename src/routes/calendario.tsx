@@ -144,7 +144,7 @@ function Calendario() {
                   {t.titulo}
                 </div>
                 <div className="text-xs text-muted-foreground">
-                  {nombreCuadro(s.cuadros, t.cuadro_id)} · {filasTexto(s.filas, t.fila_ids)} · {zonaLabel(t.zona)}
+                  {nombreCuadro(s.cuadros, t.cuadro_id)} · {seccionesTexto(s.filas, t.secciones)}
                 </div>
               </div>
               <span className="text-sm">{fmt(t.fecha_inicio)} – {fmt(t.fecha_fin)}</span>

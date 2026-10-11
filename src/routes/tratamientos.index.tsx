@@ -73,7 +73,7 @@ function Tratamientos() {
                         {a.lluvia_prevista_24h && <span className="text-warn flex items-center gap-1"><CloudRain className="size-3" />Lluvia</span>}
                       </div>
                     </TableCell>
-                    <TableCell className="text-xs">{nombreCuadro(s.cuadros, a.cuadro_id)}<br />{filasTexto(s.filas, a.fila_ids)} · {zonaLabel(a.zona)}</TableCell>
+                    <TableCell className="text-xs">{nombreCuadro(s.cuadros, a.cuadro_id)}<br />{seccionesTexto(s.filas, a.secciones)}</TableCell>
                     <TableCell>{num(a.litros_caldo)} L</TableCell>
                     <TableCell>{num(a.cantidad_producto, 3)} {P(a.producto_id)?.unidad_stock}</TableCell>
                     <TableCell>{U(a.aplicado_por)}</TableCell>
@@ -94,7 +94,7 @@ function Tratamientos() {
             {lista.map((a) => (
               <div key={a.id} className="ov-card p-4 text-sm">
                 <div className="flex justify-between text-foreground"><span>{P(a.producto_id)?.nombre_comercial}</span><span>{fmt(a.fecha)}</span></div>
-                <div className="text-xs text-muted-foreground">{nombreCuadro(s.cuadros, a.cuadro_id)} · {filasTexto(s.filas, a.fila_ids)} · {zonaLabel(a.zona)}</div>
+                <div className="text-xs text-muted-foreground">{nombreCuadro(s.cuadros, a.cuadro_id)} · {seccionesTexto(s.filas, a.secciones)}</div>
                 <div className="mt-1">{num(a.cantidad_producto, 3)} {P(a.producto_id)?.unidad_stock} en {num(a.litros_caldo)} L · libre {fmt(a.fecha_libre_cosecha)}</div>
               </div>
             ))}
