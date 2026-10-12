@@ -37,11 +37,7 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col bg-sidebar text-sidebar-foreground">
       <div className="flex flex-col items-center gap-2 border-b border-sidebar-border px-6 py-6">
-        <img src={logo.url} alt="Olivares Villairenses" className="size-20" />
-        <div className="text-center font-display text-xl font-light leading-tight">
-          Olivares Villairenses
-          <div className="font-sans text-[11px] uppercase tracking-[0.2em] text-ov-gold">Cuaderno de campo</div>
-        </div>
+        <div className="text-center font-display text-2xl font-light leading-tight">Cuaderno de campo</div>
       </div>
       <nav className="flex-1 space-y-1 p-3">
         {NAV.filter((n) => !("admin" in n) || isAdmin).map((n) => {

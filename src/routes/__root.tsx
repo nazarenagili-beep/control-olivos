@@ -63,9 +63,9 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Cuaderno de Campo – Olivares Villairenses" },
-      { name: "description", content: "Planificación y registro del mantenimiento del olivar de Olivares Villairenses." },
-      { property: "og:title", content: "Cuaderno de Campo – Olivares Villairenses" },
+      { title: "Cuaderno de campo" },
+      { name: "description", content: "Planificación y registro del mantenimiento del olivar." },
+      { property: "og:title", content: "Cuaderno de campo" },
       { property: "og:description", content: "Planificación y registro del mantenimiento del olivar." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary" },
