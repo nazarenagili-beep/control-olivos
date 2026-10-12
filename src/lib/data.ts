@@ -232,7 +232,7 @@ const PLAN: PlanBase[] = [
   { key: "p-yuyos", titulo: "Fumigación (mata yuyos)", tipo: "tratamiento", desc: "Glifosato 300 cc por 10 L y A35T 5 cc por 10 L. Sin viento, temprano o al atardecer.", ini: [9, 1], fin: [11, 30], cuadro: null },
   { key: "p-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas. Mezcla: 1 rayita de aceite 2T por cada litro de nafta.", ini: [9, 1], fin: [2, 28], cuadro: null, sigAnio: true },
   { key: "p-cochinilla", titulo: "Tratamiento cochinilla", tipo: "tratamiento", desc: "Cipermetrina 15 cc + coadyuvante 75 cc + jabón potásico 150 cc por mochila de 15 L. Cada 15 días (cada 7 si hay mucha). Solo hectáreas 1, 2 y 3.", ini: [9, 1], fin: [11, 30], cuadro: "c-prod" },
-  { key: "p-poda", titulo: "Poda de producción", tipo: "poda", desc: "Poda de producción.", ini: [9, 1], fin: [9, 30], cuadro: "c-prod" },
+  { key: "p-poda", titulo: "Poda de producción", tipo: "poda", desc: "Poda de producción (hectáreas 4 y 5).", ini: [9, 1], fin: [9, 30], cuadro: "c-joven" },
   { key: "p-plantar", titulo: "Plantar plantas que están muertas", tipo: "mantenimiento", desc: "Reponer olivos muertos.", ini: [10, 1], fin: [11, 30], cuadro: null },
 ];
 
