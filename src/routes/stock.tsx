@@ -18,6 +18,7 @@ export const Route = createFileRoute("/stock")({
 function Stock() {
   const s = useStore();
   const [modo, setModo] = useState<null | "compra" | "ajuste">(null);
+  const [editId, setEditId] = useState<string | null>(null);
   const [prod, setProd] = useState(s.productos[0]?.id ?? "");
   const [cant, setCant] = useState("");
   const [precio, setPrecio] = useState("");
@@ -25,19 +26,37 @@ function Stock() {
   const [nota, setNota] = useState("");
   if (!s.isAdmin) return <StockTrabajador />;
   const avisos = s.productos.filter((p) => p.falta);
+  const prodSel = s.productos.find((p) => p.id === prod);
+
+  const cerrar = () => { setModo(null); setEditId(null); setCant(""); setPrecio(""); setNota(""); setFecha(s.hoy); };
+  const abrirCompra = (id: string) => {
+    const m = s.movimientos.find((x) => x.id === id);
+    if (!m) return;
+    setEditId(id); setProd(m.producto_id); setCant(String(m.cantidad)); setPrecio(String(m.precio_total ?? "")); setFecha(m.fecha); setNota(m.nota); setModo("compra");
+  };
 
   const guardar = () => {
+    if (cant.trim() === "" || isNaN(Number(cant))) return toast.error("Indica una cantidad.");
     const c = Number(cant);
-    if (!c) return toast.error("Indica una cantidad.");
     if (modo === "compra") {
+      if (!(c > 0)) return toast.error("La cantidad comprada debe ser mayor que 0.");
       if (!(Number(precio) > 0)) return toast.error("Indica el precio total.");
-      s.addCompra(prod, c, Number(precio), fecha, nota);
+      if (editId) s.updateCompra(editId, c, Number(precio), fecha, nota);
+      else s.addCompra(prod, c, Number(precio), fecha, nota);
     } else {
-      if (!nota.trim()) return toast.error("El motivo del ajuste es obligatorio.");
-      s.addAjuste(prod, c, fecha, nota);
+      if (c < 0) return toast.error("La cantidad no puede ser negativa.");
+      const dif = c - (prodSel?.stock_actual ?? 0);
+      if (dif === 0) return toast.info("El stock ya tiene esa cantidad.");
+      s.addAjuste(prod, dif, fecha, nota.trim() || "Recuento");
     }
-    toast.success("Movimiento registrado");
-    setModo(null); setCant(""); setPrecio(""); setNota("");
+    toast.success(editId ? "Compra corregida" : "Movimiento registrado");
+    cerrar();
+  };
+  const borrar = () => {
+    if (!editId || !confirm("¿Borrar esta compra? Se restará del stock.")) return;
+    s.deleteMovimiento(editId);
+    toast.success("Compra borrada");
+    cerrar();
   };
 
   const gasto = new Map<string, number>();
