@@ -90,7 +90,7 @@ function useStoreState() {
         rol: (ro.data ?? []).some((r) => r.user_id === p.id && r.role === "admin") ? "admin" : "campo",
       }));
       if (!us.some((u) => u.id === uid && u.activo)) { setSinAcceso(true); return; }
-      const ordenFecha = (x: { fecha: string }[]) => x.sort((a, b) => b.fecha.localeCompare(a.fecha));
+      const ordenFecha = <T extends { fecha: string },>(x: T[]) => x.sort((a, b) => b.fecha.localeCompare(a.fecha));
       refs.cuadros.current = cu; refs.filas.current = fi; refs.tareas.current = ta; refs.productos.current = pr;
       refs.aplicaciones.current = ordenFecha(ap); refs.movimientos.current = ordenFecha(mo); refs.registros.current = ordenFecha(re); refs.config.current = co;
       setCuadros(cu); setFilas(fi); setTareas(ta); setProductos(pr); setAplicaciones(ap); setMovimientos(mo); setRegistros(re); setConfigs(co);
@@ -125,7 +125,7 @@ function useStoreState() {
         estado,
         nota_cierre: nota ?? t.nota_cierre,
         foto_nombre: foto ?? t.foto_nombre,
-        ...(estado === "hecha" ? { completada_en: new Date().toISOString(), completada_por: currentUserId } : {}),
+        ...(estado === "hecha" ? { completada_en: new Date().toISOString(), completada_por: currentUserId ?? "" } : {}),
       };
       let next = ts.map((x) => (x.id === id ? upd : x));
       if (estado === "hecha" && t.estado !== "hecha" && t.recurrencia !== "ninguna") {
@@ -161,8 +161,8 @@ function useStoreState() {
       const quitadas = prev.secciones_hechas.filter((x) => !ahora.has(x));
       const nuevos: Registro[] = [];
       const fecha = new Date().toISOString();
-      if (hechas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: hechas, accion: "hecho", usuario_id: currentUserId });
-      if (quitadas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: quitadas, accion: "desmarcado", usuario_id: currentUserId });
+      if (hechas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: hechas, accion: "hecho", usuario_id: currentUserId ?? "" });
+      if (quitadas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: quitadas, accion: "desmarcado", usuario_id: currentUserId ?? "" });
       if (nuevos.length) setRegistros((r) => [...nuevos, ...r]);
     }
     setTareas((ts) => ts.map((t) => (t.id === id ? { ...t, secciones_hechas: secs, estado: t.estado === "pendiente" && secs.length ? "en_curso" : t.estado } : t)));
