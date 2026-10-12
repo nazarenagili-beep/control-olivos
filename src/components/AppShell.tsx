@@ -9,7 +9,6 @@ import {
   Menu,
   Package,
   Settings,
-  ShieldCheck,
   Warehouse,
   Wheat,
 } from "lucide-react";

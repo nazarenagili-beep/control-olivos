@@ -16,7 +16,6 @@ import { Route as ConfiguracionRouteImport } from './routes/configuracion'
 import { Route as CosechaRouteImport } from './routes/cosecha'
 import { Route as InformacionRouteImport } from './routes/informacion'
 import { Route as LoginRouteImport } from './routes/login'
-import { Route as PlazosRouteImport } from './routes/plazos'
 import { Route as StockRouteImport } from './routes/stock'
 import { Route as ProductosIndexRouteImport } from './routes/productos.index'
 import { Route as ProductosIdRouteImport } from './routes/productos.$id'
@@ -58,11 +57,6 @@ const LoginRoute = LoginRouteImport.update({
   path: '/login',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PlazosRoute = PlazosRouteImport.update({
-  id: '/plazos',
-  path: '/plazos',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const StockRoute = StockRouteImport.update({
   id: '/stock',
   path: '/stock',
@@ -97,7 +91,6 @@ export interface FileRoutesByFullPath {
   '/cosecha': typeof CosechaRoute
   '/informacion': typeof InformacionRoute
   '/login': typeof LoginRoute
-  '/plazos': typeof PlazosRoute
   '/stock': typeof StockRoute
   '/productos/$id': typeof ProductosIdRoute
   '/tratamientos/nueva': typeof TratamientosNuevaRoute
@@ -112,7 +105,6 @@ export interface FileRoutesByTo {
   '/cosecha': typeof CosechaRoute
   '/informacion': typeof InformacionRoute
   '/login': typeof LoginRoute
-  '/plazos': typeof PlazosRoute
   '/stock': typeof StockRoute
   '/productos/$id': typeof ProductosIdRoute
   '/tratamientos/nueva': typeof TratamientosNuevaRoute
@@ -128,7 +120,6 @@ export interface FileRoutesById {
   '/cosecha': typeof CosechaRoute
   '/informacion': typeof InformacionRoute
   '/login': typeof LoginRoute
-  '/plazos': typeof PlazosRoute
   '/stock': typeof StockRoute
   '/productos/$id': typeof ProductosIdRoute
   '/tratamientos/nueva': typeof TratamientosNuevaRoute
@@ -145,7 +136,6 @@ export interface FileRouteTypes {
     | '/cosecha'
     | '/informacion'
     | '/login'
-    | '/plazos'
     | '/stock'
     | '/productos/$id'
     | '/tratamientos/nueva'
@@ -160,7 +150,6 @@ export interface FileRouteTypes {
     | '/cosecha'
     | '/informacion'
     | '/login'
-    | '/plazos'
     | '/stock'
     | '/productos/$id'
     | '/tratamientos/nueva'
@@ -175,7 +164,6 @@ export interface FileRouteTypes {
     | '/cosecha'
     | '/informacion'
     | '/login'
-    | '/plazos'
     | '/stock'
     | '/productos/$id'
     | '/tratamientos/nueva'
@@ -191,7 +179,6 @@ export interface RootRouteChildren {
   CosechaRoute: typeof CosechaRoute
   InformacionRoute: typeof InformacionRoute
   LoginRoute: typeof LoginRoute
-  PlazosRoute: typeof PlazosRoute
   StockRoute: typeof StockRoute
   ProductosIdRoute: typeof ProductosIdRoute
   TratamientosNuevaRoute: typeof TratamientosNuevaRoute
@@ -250,13 +237,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LoginRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/plazos': {
-      id: '/plazos'
-      path: '/plazos'
-      fullPath: '/plazos'
-      preLoaderRoute: typeof PlazosRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/stock': {
       id: '/stock'
       path: '/stock'
@@ -303,7 +283,6 @@ const rootRouteChildren: RootRouteChildren = {
   CosechaRoute: CosechaRoute,
   InformacionRoute: InformacionRoute,
   LoginRoute: LoginRoute,
-  PlazosRoute: PlazosRoute,
   StockRoute: StockRoute,
   ProductosIdRoute: ProductosIdRoute,
   TratamientosNuevaRoute: TratamientosNuevaRoute,
