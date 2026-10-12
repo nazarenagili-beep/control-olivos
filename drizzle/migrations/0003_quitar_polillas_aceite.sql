@@ -1,0 +1,1 @@
+delete from public.tareas where id like 'plan-%-v-polillas' or id like 'plan-%-i-aceite' or id like 'plan-%-p-aceite';

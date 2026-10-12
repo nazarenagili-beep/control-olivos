@@ -22,6 +22,13 @@
       "when": 1791801564855,
       "tag": "0002_cochinilla_ha_1_3",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1791801780483,
+      "tag": "0003_quitar_polillas_aceite",
+      "breakpoints": true
     }
   ]
 }
