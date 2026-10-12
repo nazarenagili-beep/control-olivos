@@ -99,9 +99,18 @@ function InicioAdmin() {
   const filasDisponibles = filasOrden.filter((f) => !ha || haDeFila(f.numero) === ha);
 
   const textoFilas = (its: Item[]) => {
-    const m = new Map<number, string[]>();
-    its.forEach((i) => m.set(i.fila, [...(m.get(i.fila) ?? []), i.lado]));
-    return [...m.entries()].sort((a, b) => a[0] - b[0]).map(([n, zs]) => `F${n} ${zs.length === 2 ? "A+B" : zs[0]}`).join(" · ");
+    const m = new Map<number, Set<string>>();
+    its.forEach((i) => m.set(i.fila, (m.get(i.fila) ?? new Set()).add(i.lado)));
+    const ent = [...m.entries()].sort((a, b) => a[0] - b[0]);
+    const out: string[] = [];
+    let ini: number | null = null, prev = -1;
+    const cerrar = () => { if (ini !== null) out.push(ini === prev ? `F${ini}` : `F${ini}–${prev}`); ini = null; };
+    for (const [n, zs] of ent) {
+      if (zs.size === 2) { if (ini !== null && n === prev + 1) prev = n; else { cerrar(); ini = n; prev = n; } }
+      else { cerrar(); out.push(`F${n} (solo ${[...zs][0]})`); }
+    }
+    cerrar();
+    return out.join(" · ");
   };
 
   const Box = ({ t, v, children, tone }: { t: string; v: number | string; children?: ReactNode; tone?: string }) => (
