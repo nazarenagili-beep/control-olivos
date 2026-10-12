@@ -177,7 +177,9 @@ function useStoreState() {
 }
 
 type Store = ReturnType<typeof useStoreState>;
-const Ctx = createContext<Store | null>(null);
+// Se guarda en globalThis para que el contexto sobreviva a las recargas en caliente durante el desarrollo.
+const g = globalThis as unknown as { __ovStoreCtx?: ReturnType<typeof createContext<Store | null>> };
+const Ctx = (g.__ovStoreCtx ??= createContext<Store | null>(null));
 export function StoreProvider({ children }: { children: ReactNode }) {
   const s = useStoreState();
   return <Ctx.Provider value={s}>{children}</Ctx.Provider>;
