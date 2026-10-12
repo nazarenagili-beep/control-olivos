@@ -60,11 +60,10 @@ function Stock() {
   };
 
   const gasto = new Map<string, number>();
-  s.aplicaciones.forEach((a) => {
-    const p = s.productos.find((x) => x.id === a.producto_id);
-    if (!p) return;
-    const k = `${a.fecha.slice(0, 7)}|${a.cuadro_id}`;
-    gasto.set(k, (gasto.get(k) ?? 0) + a.cantidad_producto * p.precio_por_unidad);
+  s.movimientos.forEach((m) => {
+    if (m.tipo !== "compra" || !m.precio_total) return;
+    const k = `${m.fecha.slice(0, 7)}|${m.producto_id}`;
+    gasto.set(k, (gasto.get(k) ?? 0) + m.precio_total);
   });
   const PN = (id: string) => s.productos.find((p) => p.id === id);
 
