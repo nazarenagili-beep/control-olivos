@@ -80,10 +80,10 @@ function Informacion() {
         <Card title="Próximos 30 días" icon={<CalendarRange className="size-5 text-ov-olive-light" />} count={proximos.length} to="/calendario">
           {proximos.length ? proximos.slice(0, 6).map((t) => <Row key={t.id} t={t} />) : <Empty>Nada previsto.</Empty>}
         </Card>
-        <Card title="Plazos de seguridad activos" icon={<ShieldAlert className="size-5 text-danger" />} count={plazos.length} to="/plazos">
+        <Card title="Plazos de seguridad activos" icon={<ShieldAlert className="size-5 text-danger" />} count={plazos.length} to="/tratamientos">
           {porCuadro.length ? (
             porCuadro.map(({ c, ps, max }) => (
-              <Link key={c.id} to="/plazos" className="flex items-center justify-between rounded-md px-2 py-2 text-sm hover:bg-ov-beige-light">
+              <Link key={c.id} to="/tratamientos" className="flex items-center justify-between rounded-md px-2 py-2 text-sm hover:bg-ov-beige-light">
                 <span className="text-foreground">
                   {c.nombre} · {ps.length} filas
                 </span>
