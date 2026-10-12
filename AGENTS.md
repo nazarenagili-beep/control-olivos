@@ -10,6 +10,7 @@
 <!-- LOVABLE:END -->
 
 ## Architecture rules
-- Phase 1 business data lives in an in-memory React store (src/lib/store.tsx) — temporary until Lovable Cloud replaces it; never use localStorage for business data.
 - Domain math (dose calc, safety-interval per row, harvest conflicts) lives in src/lib/logic.ts so UI and future server code share one implementation.
 - tsconfig strict extras (exactOptionalPropertyTypes etc.) are disabled to keep UI code simple.
+- Business data persists in Lovable Cloud as generic tables (id text, data jsonb) loaded by src/lib/store.tsx, which diffs state by reference and upserts/deletes — keeps the UI store API unchanged.
+- Sign-up is restricted by a DB trigger to invited emails (invitaciones table) plus the admin email; roles live in user_roles — no public signup.
