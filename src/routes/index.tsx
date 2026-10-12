@@ -1,72 +1,106 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
+import { useMemo, useState, type ReactNode } from "react";
+import { CheckCircle2, Circle } from "lucide-react";
 import { pageHead } from "@/lib/head";
 import { useStore } from "@/lib/store";
-import { addDays, esAtrasada, fmt, plazosPorFila } from "@/lib/logic";
-import type { Tarea } from "@/lib/data";
-import { PageHeader, TipoChip, seccionesTexto } from "@/components/ov";
+import { addDays, fmt } from "@/lib/logic";
+import { TIPO_LABEL, type Tarea, type TipoTarea } from "@/lib/data";
+import { PageHeader, TipoChip, haDeFila } from "@/components/ov";
 import { CampoMapa } from "@/components/CampoMapa";
 import { TaskDialog } from "@/components/TaskDialog";
 
 export const Route = createFileRoute("/")({
-  head: () => pageHead("Inicio", "Resumen del campo: trabajos realizados, avance de cada labor y pendientes."),
+  head: () => pageHead("Inicio", "Resumen del campo: qué se hizo y qué falta, por fecha, tarea, hectárea, fila y lado."),
   component: Inicio,
 });
 
-const FILTROS = [
-  { k: 1, l: "Ayer" },
-  { k: 3, l: "3 días" },
-  { k: 7, l: "7 días" },
-  { k: 15, l: "15 días" },
-  { k: 30, l: "30 días" },
-  { k: 90, l: "90 días" },
-  { k: 0, l: "Todo" },
-];
+const PERIODOS = [1, 3, 7, 15, 30, 90];
 
-const hora = (iso: string) =>
-  new Date(iso).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires", day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+type Item = { tarea: Tarea; fila: number; ha: number; lado: "A" | "B"; hecho: boolean; fecha: string | null; quien: string | null };
+
+function Chips<T extends string | number>({ label, value, onChange, opts }: { label: string; value: T; onChange: (v: T) => void; opts: { v: T; l: string }[] }) {
+  return (
+    <div>
+      <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">{label}</p>
+      <div className="flex flex-wrap gap-1.5">
+        {opts.map((o) => (
+          <button
+            key={String(o.v)}
+            onClick={() => onChange(o.v)}
+            className={`rounded-full border px-3 py-1 text-sm ${value === o.v ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card hover:bg-muted"}`}
+          >
+            {o.l}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 function Inicio() {
   const s = useStore();
   const [dias, setDias] = useState(7);
+  const [tipo, setTipo] = useState<TipoTarea | "todos">("todos");
+  const [estado, setEstado] = useState<"todas" | "hecho" | "pendiente">("todas");
+  const [ha, setHa] = useState<number>(0);
+  const [fila, setFila] = useState<number>(0);
+  const [lado, setLado] = useState<"ambos" | "A" | "B">("ambos");
   const [sel, setSel] = useState<Tarea | null>(null);
-  const nombre = (id: string) => s.usuarios.find((u) => u.id === id)?.nombre ?? "—";
+  const nombre = (id?: string | null) => (id ? s.usuarios.find((u) => u.id === id)?.nombre ?? null : null);
 
-  const historial = useMemo(() => {
-    const desde = dias ? Date.now() - dias * 86400000 : 0;
-    const regs = s.registros.map((r) => ({ id: r.id, fecha: r.fecha, titulo: r.titulo, tipo: r.tipo, tarea_id: r.tarea_id, detalle: seccionesTexto(s.filas, r.secciones), accion: r.accion, quien: nombre(r.usuario_id) }));
-    const apps = s.aplicaciones.map((a) => {
-      const p = s.productos.find((x) => x.id === a.producto_id);
-      return { id: a.id, fecha: `${a.fecha}T12:00:00-03:00`, titulo: `Aplicación: ${p?.nombre_comercial ?? "producto"}`, tipo: "tratamiento" as const, tarea_id: a.tarea_id ?? null, detalle: `${a.litros_caldo} L de caldo`, accion: "hecho" as const, quien: nombre((a as { aplicador_id?: string }).aplicador_id ?? "") };
-    });
-    return [...regs, ...apps].filter((x) => new Date(x.fecha).getTime() >= desde).sort((a, b) => b.fecha.localeCompare(a.fecha));
-  }, [s.registros, s.aplicaciones, dias, s.filas]);
+  const desde = addDays(s.hoy, -dias);
+  const desdeMs = Date.now() - dias * 86400000;
+  const filasOrden = [...s.filas].sort((a, b) => a.numero - b.numero);
 
-  const totalSecs = s.filas.length * 2;
-  const enCurso = s.tareas
-    .filter((t) => t.estado !== "hecha" && (t.estado === "en_curso" || (t.fecha_inicio <= s.hoy && t.fecha_fin >= s.hoy)))
-    .map((t) => {
-      const objetivo = t.secciones.length ? t.secciones : s.filas.filter((f) => !t.cuadro_id || f.cuadro_id === t.cuadro_id).flatMap((f) => [`${f.id}:A`, `${f.id}:B`]);
-      const hechas = new Set(t.secciones_hechas);
-      const faltan = objetivo.filter((k) => !hechas.has(k));
-      const has = [...new Set(faltan.map((k) => s.filas.find((f) => f.id === k.split(":")[0])?.numero).filter(Boolean).map((n) => Math.ceil(n! / 7)))].sort((a, b) => a - b);
-      const pct = objetivo.length ? Math.round(((objetivo.length - faltan.length) / objetivo.length) * 100) : 0;
-      return { t, pct, has, atrasada: esAtrasada(t, s.hoy) };
-    })
-    .sort((a, b) => b.pct - a.pct);
+  const items = useMemo(() => {
+    const out: Item[] = [];
+    for (const t of s.tareas) {
+      // La tarea cuenta si su ventana se cruza con el período elegido.
+      if (t.fecha_inicio > s.hoy || t.fecha_fin < desde) continue;
+      const secs = t.secciones.length ? t.secciones : s.filas.filter((f) => !t.cuadro_id || f.cuadro_id === t.cuadro_id).flatMap((f) => [`${f.id}:A`, `${f.id}:B`]);
+      for (const k of secs) {
+        const [fid, z] = k.split(":") as [string, "A" | "B"];
+        const f = s.filas.find((x) => x.id === fid);
+        if (!f) continue;
+        const reg = s.registros.find((r) => r.tarea_id === t.id && r.secciones.includes(k));
+        const hecho = t.estado === "hecha" || t.secciones_hechas.includes(k);
+        const fecha = hecho ? (reg && reg.accion === "hecho" ? reg.fecha : t.completada_en ?? null) : null;
+        if (hecho && fecha && new Date(fecha).getTime() < desdeMs) continue; // hecho antes del período
+        out.push({ tarea: t, fila: f.numero, ha: haDeFila(f.numero), lado: z, hecho, fecha, quien: hecho ? nombre(reg?.usuario_id ?? t.completada_por) : null });
+      }
+    }
+    return out;
+  }, [s.tareas, s.registros, s.filas, dias]);
 
-  const ultimo = s.registros[0];
-  const plazos = plazosPorFila(s.filas, s.aplicaciones, s.productos).filter((p) => p.libre && p.libre > s.hoy).length;
-  const stockBajo = s.productos.filter((p) => p.activo && p.stock_actual < p.stock_minimo).length;
-  const atrasadas = s.tareas.filter((t) => t.estado !== "hecha" && esAtrasada(t, s.hoy)).length;
-  const semana = s.registros.filter((r) => r.accion === "hecho" && Date.now() - new Date(r.fecha).getTime() < 7 * 86400000).reduce((n, r) => n + r.secciones.length, 0);
-  void addDays; void totalSecs;
+  const filtrados = items.filter(
+    (i) =>
+      (tipo === "todos" || i.tarea.tipo === tipo) &&
+      (estado === "todas" || (estado === "hecho" ? i.hecho : !i.hecho)) &&
+      (!ha || i.ha === ha) &&
+      (!fila || i.fila === fila) &&
+      (lado === "ambos" || i.lado === lado),
+  );
+  const hechos = filtrados.filter((i) => i.hecho).length;
+  const pendientes = filtrados.length - hechos;
 
-  const Kpi = ({ t, v, sub, danger }: { t: string; v: string | number; sub: string; danger?: boolean }) => (
+  const porTarea = [...filtrados.reduce((m, i) => m.set(i.tarea.id, [...(m.get(i.tarea.id) ?? []), i]), new Map<string, Item[]>()).values()]
+    .map((its) => ({ t: its[0].tarea, its, hechos: its.filter((i) => i.hecho).length }))
+    .sort((a, b) => b.hechos / b.its.length - a.hechos / a.its.length);
+
+  const tiposPresentes = [...new Set(items.map((i) => i.tarea.tipo))];
+  const filasDisponibles = filasOrden.filter((f) => !ha || haDeFila(f.numero) === ha);
+
+  const textoFilas = (its: Item[]) => {
+    const m = new Map<number, string[]>();
+    its.forEach((i) => m.set(i.fila, [...(m.get(i.fila) ?? []), i.lado]));
+    return [...m.entries()].sort((a, b) => a[0] - b[0]).map(([n, zs]) => `F${n} ${zs.length === 2 ? "A+B" : zs[0]}`).join(" · ");
+  };
+
+  const Box = ({ t, v, children, tone }: { t: string; v: number | string; children?: ReactNode; tone?: string }) => (
     <div className="ov-card p-4">
-      <div className="text-xs uppercase tracking-wide text-muted-foreground">{t}</div>
-      <div className={`font-display text-3xl ${danger ? "text-danger" : ""}`}>{v}</div>
-      <div className="text-xs text-muted-foreground">{sub}</div>
+      <div className="text-xs uppercase tracking-wider text-muted-foreground">{t}</div>
+      <div className={`font-display text-4xl ${tone ?? ""}`}>{v}</div>
+      {children && <div className="text-xs text-muted-foreground">{children}</div>}
     </div>
   );
 
@@ -74,66 +108,73 @@ function Inicio() {
     <>
       <PageHeader title={`Buen día, ${s.user.nombre.split(" ")[0]}`} subtitle={`Hoy es ${fmt(s.hoy)} · Villa Iris`} />
 
-      <div className="mb-6 grid grid-cols-2 gap-3 lg:grid-cols-4">
-        <Kpi t="Último trabajo" v={ultimo ? fmt(ultimo.fecha.slice(0, 10)) : "—"} sub={ultimo ? `${ultimo.titulo} · ${nombre(ultimo.usuario_id)}` : "Sin registros"} />
-        <Kpi t="Medias filas hechas" v={semana} sub="en los últimos 7 días" />
-        <Kpi t="Tareas atrasadas" v={atrasadas} sub="fuera de su fecha" danger={atrasadas > 0} />
-        <Kpi t="Alertas" v={plazos + stockBajo} sub={`${plazos} filas en espera · ${stockBajo} stock bajo`} danger={plazos + stockBajo > 0} />
+      <section className="ov-card mb-6 grid gap-4 p-5 md:grid-cols-2">
+        <Chips label="Período" value={dias} onChange={setDias} opts={PERIODOS.map((d) => ({ v: d, l: d === 1 ? "1 día" : `${d} días` }))} />
+        <Chips label="Estado" value={estado} onChange={setEstado} opts={[{ v: "todas", l: "Todas" }, { v: "hecho", l: "Realizadas" }, { v: "pendiente", l: "Pendientes" }]} />
+        <Chips label="Tipo de tarea" value={tipo} onChange={setTipo} opts={[{ v: "todos" as const, l: "Todos" }, ...tiposPresentes.map((x) => ({ v: x, l: TIPO_LABEL[x] }))]} />
+        <Chips label="Lado" value={lado} onChange={setLado} opts={[{ v: "ambos", l: "A y B" }, { v: "A", l: "Zona A (izq.)" }, { v: "B", l: "Zona B (der.)" }]} />
+        <Chips label="Hectárea" value={ha} onChange={(v) => { setHa(v); setFila(0); }} opts={[{ v: 0, l: "Todas" }, ...[1, 2, 3, 4, 5].map((h) => ({ v: h, l: `Ha ${h}` }))]} />
+        <div>
+          <p className="mb-1 text-xs uppercase tracking-wider text-muted-foreground">Fila</p>
+          <select value={fila} onChange={(e) => setFila(Number(e.target.value))} className="rounded-md border border-border bg-card px-3 py-1.5 text-sm">
+            <option value={0}>Todas las filas</option>
+            {filasDisponibles.map((f) => (
+              <option key={f.id} value={f.numero}>Fila {f.numero} (Ha {haDeFila(f.numero)})</option>
+            ))}
+          </select>
+        </div>
+      </section>
+
+      <div className="mb-6 grid grid-cols-3 gap-3">
+        <Box t="Realizado" v={hechos} tone="text-ov-olive-light">medias filas</Box>
+        <Box t="Pendiente" v={pendientes} tone={pendientes ? "text-danger" : ""}>medias filas</Box>
+        <Box t="Avance" v={filtrados.length ? `${Math.round((hechos / filtrados.length) * 100)}%` : "—"}>{porTarea.length} tareas</Box>
       </div>
 
-      <div className="mb-6 grid gap-6 lg:grid-cols-2">
-        <section className="ov-card p-5">
-          <h3 className="mb-3 text-xl">Trabajos realizados</h3>
-          <div className="mb-4 flex flex-wrap gap-2">
-            {FILTROS.map((f) => (
-              <button key={f.k} onClick={() => setDias(f.k)} className={`rounded-full border px-3 py-1 text-sm ${dias === f.k ? "border-primary bg-primary text-primary-foreground" : "border-border hover:bg-muted"}`}>
-                {f.l}
-              </button>
-            ))}
-          </div>
-          <div className="max-h-[480px] space-y-2 overflow-y-auto">
-            {historial.length === 0 && <p className="text-sm text-muted-foreground">No hay trabajos registrados en este período.</p>}
-            {historial.map((h) => (
-              <button key={h.id} onClick={() => setSel(s.tareas.find((t) => t.id === h.tarea_id) ?? null)} className="block w-full rounded-md border border-border p-3 text-left hover:bg-muted">
-                <div className="flex items-center justify-between gap-2 text-xs text-muted-foreground">
-                  <span>{hora(h.fecha)}</span>
-                  <span>{h.quien}</span>
+      <section className="ov-card mb-6 p-5">
+        <h3 className="mb-1 text-xl">Qué se hizo y qué falta</h3>
+        <p className="mb-4 text-sm text-muted-foreground">Últimos {dias === 1 ? "1 día" : `${dias} días`} (desde el {fmt(desde)}). Toca una tarea para ver el detalle.</p>
+        {porTarea.length === 0 && <p className="text-sm text-muted-foreground">No hay nada con estos filtros.</p>}
+        <div className="space-y-3">
+          {porTarea.map(({ t, its, hechos: h }) => {
+            const pct = Math.round((h / its.length) * 100);
+            const hechosIts = its.filter((i) => i.hecho);
+            const pend = its.filter((i) => !i.hecho);
+            const ultima = hechosIts.map((i) => i.fecha).filter(Boolean).sort().pop();
+            const quien = hechosIts.find((i) => i.fecha === ultima)?.quien;
+            return (
+              <button key={t.id} onClick={() => setSel(t)} className="block w-full rounded-lg border border-border p-4 text-left hover:bg-muted">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <TipoChip tipo={t.tipo} />
+                    <span className="text-base font-medium">{t.titulo}</span>
+                  </div>
+                  <span className="text-sm text-muted-foreground">{h} de {its.length} medias filas · {pct}%</span>
                 </div>
-                <div className="mt-1 flex items-center gap-2">
-                  <TipoChip tipo={h.tipo} />
-                  <span className={`font-medium ${h.accion === "desmarcado" ? "line-through opacity-60" : ""}`}>{h.titulo}</span>
+                <div className="mt-2 h-2 overflow-hidden rounded-full bg-ov-beige-light">
+                  <div className="h-full bg-ov-olive-light" style={{ width: `${pct}%` }} />
                 </div>
-                <div className="mt-1 text-sm text-muted-foreground">
-                  {h.accion === "desmarcado" ? "Desmarcado: " : ""}
-                  {h.detalle}
-                </div>
-              </button>
-            ))}
-          </div>
-        </section>
-
-        <section className="ov-card p-5">
-          <h3 className="mb-3 text-xl">Labores en curso y pendientes</h3>
-          <div className="max-h-[530px] space-y-3 overflow-y-auto">
-            {enCurso.length === 0 && <p className="text-sm text-muted-foreground">No hay labores en curso ahora.</p>}
-            {enCurso.map(({ t, pct, has, atrasada }) => (
-              <button key={t.id} onClick={() => setSel(t)} className="block w-full rounded-md border border-border p-3 text-left hover:bg-muted">
-                <div className="flex items-center justify-between gap-2">
-                  <span className="font-medium">{t.titulo}</span>
-                  <span className={`text-sm ${atrasada ? "text-danger" : "text-muted-foreground"}`}>{pct}%</span>
-                </div>
-                <div className="mt-2 h-2 overflow-hidden rounded-full bg-muted">
-                  <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
-                </div>
-                <div className="mt-1 text-xs text-muted-foreground">
-                  {pct === 100 ? "Completado" : `Falta: ${has.map((h) => `Ha ${h}`).join(", ")}`} · hasta {fmt(t.fecha_fin)}
+                <div className="mt-3 grid gap-2 text-sm md:grid-cols-2">
+                  <div className="flex gap-2">
+                    <CheckCircle2 className="mt-0.5 size-4 shrink-0 text-ov-olive-light" />
+                    <span>
+                      <b>Hecho:</b> {hechosIts.length ? textoFilas(hechosIts) : "nada todavía"}
+                      {ultima && <span className="block text-xs text-muted-foreground">Último: {fmt(ultima.slice(0, 10))}{quien ? ` · ${quien}` : ""}</span>}
+                    </span>
+                  </div>
+                  <div className="flex gap-2">
+                    <Circle className="mt-0.5 size-4 shrink-0 text-danger" />
+                    <span>
+                      <b>Falta:</b> {pend.length ? textoFilas(pend) : "completo"}
+                      <span className="block text-xs text-muted-foreground">Plazo hasta {fmt(t.fecha_fin)}</span>
+                    </span>
+                  </div>
                 </div>
               </button>
-            ))}
-          </div>
-          <Link to="/calendario" className="mt-3 inline-block text-sm underline">Ver calendario completo</Link>
-        </section>
-      </div>
+            );
+          })}
+        </div>
+      </section>
 
       <CampoMapa />
       {sel && <TaskDialog tarea={sel} onClose={() => setSel(null)} />}
