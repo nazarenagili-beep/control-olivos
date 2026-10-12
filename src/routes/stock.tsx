@@ -110,9 +110,12 @@ function Stock() {
           <h3 className="mb-2 text-xl">Movimientos</h3>
           <ul className="divide-y divide-border text-sm">
             {s.movimientos.slice(0, 15).map((m) => (
-              <li key={m.id} className="flex justify-between gap-2 py-2">
-                <span>{fmt(m.fecha)} · {PN(m.producto_id)?.nombre_comercial} · {m.tipo}{m.nota && ` · ${m.nota}`}</span>
-                <span className={m.cantidad < 0 ? "text-danger" : "text-ok"}>{m.cantidad > 0 ? "+" : ""}{num(m.cantidad, 3)} {PN(m.producto_id)?.unidad_stock}</span>
+              <li key={m.id} className="flex items-center justify-between gap-2 py-2">
+                <span>{fmt(m.fecha)} · {PN(m.producto_id)?.nombre_comercial} · {m.tipo === "ajuste" ? "recuento" : m.tipo}{m.nota && ` · ${m.nota}`}</span>
+                <span className="flex items-center gap-2">
+                  <span className={m.cantidad < 0 ? "text-danger" : "text-ok"}>{m.cantidad > 0 ? "+" : ""}{num(m.cantidad, 3)} {PN(m.producto_id)?.unidad_stock}</span>
+                  {m.tipo === "compra" && <Button size="sm" variant="outline" onClick={() => abrirCompra(m.id)}>Corregir</Button>}
+                </span>
               </li>
             ))}
           </ul>
@@ -130,17 +133,21 @@ function Stock() {
           </table>
         </div>
       </div>
-      <Dialog open={!!modo} onOpenChange={(o) => !o && setModo(null)}>
+      <Dialog open={!!modo} onOpenChange={(o) => !o && cerrar()}>
         <DialogContent>
-          <DialogHeader><DialogTitle className="font-display text-2xl font-medium">{modo === "compra" ? "Registrar compra" : "Ajuste manual"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="font-display text-2xl font-medium">{modo === "compra" ? (editId ? "Corregir compra" : "Registrar compra") : "Recuento de stock"}</DialogTitle></DialogHeader>
           <div className="grid gap-4">
-            <Field label="Producto"><SimpleSelect value={prod} onChange={setProd} options={s.productos.map((p) => ({ value: p.id, label: `${p.nombre_comercial} (${p.unidad_stock})` }))} /></Field>
-            <Field label={modo === "compra" ? "Cantidad" : "Cantidad (negativa para restar)"}><Input type="number" step="any" className="h-11" value={cant} onChange={(e) => setCant(e.target.value)} /></Field>
+            <Field label="Producto">{editId ? <div className="text-foreground">{prodSel?.nombre_comercial} ({prodSel?.unidad_stock})</div> : <SimpleSelect value={prod} onChange={setProd} options={s.productos.map((p) => ({ value: p.id, label: `${p.nombre_comercial} (${p.unidad_stock})` }))} />}</Field>
+            {modo === "ajuste" && <p className="text-sm text-muted-foreground">Ahora la app tiene: <strong className="text-foreground">{num(prodSel?.stock_actual ?? 0, 3)} {prodSel?.unidad_stock}</strong></p>}
+            <Field label={modo === "compra" ? "Cantidad comprada" : `¿Cuánto hay hoy en el galpón? (${prodSel?.unidad_stock ?? ""})`}><Input type="number" step="any" min="0" className="h-11" value={cant} onChange={(e) => setCant(e.target.value)} /></Field>
             {modo === "compra" && <Field label="Precio total (ARS)"><Input type="number" className="h-11" value={precio} onChange={(e) => setPrecio(e.target.value)} /></Field>}
             <Field label="Fecha"><Input type="date" className="h-11" value={fecha} onChange={(e) => setFecha(e.target.value)} /></Field>
-            <Field label={modo === "compra" ? "Nota" : "Motivo (rotura, recuento, vencido…)"}><Input className="h-11" value={nota} onChange={(e) => setNota(e.target.value)} /></Field>
+            <Field label={modo === "compra" ? "Nota" : "Motivo (opcional: recuento, rotura, vencido…)"}><Input className="h-11" value={nota} onChange={(e) => setNota(e.target.value)} /></Field>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setModo(null)}>Cancelar</Button><Button onClick={guardar}>Guardar</Button></DialogFooter>
+          <DialogFooter>
+            {editId && <Button variant="outline" className="mr-auto text-danger" onClick={borrar}>Borrar compra</Button>}
+            <Button variant="outline" onClick={cerrar}>Cancelar</Button><Button onClick={guardar}>Guardar</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
