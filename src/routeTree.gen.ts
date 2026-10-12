@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as CalculadoraRouteImport } from './routes/calculadora'
 import { Route as CalendarioRouteImport } from './routes/calendario'
 import { Route as ConfiguracionRouteImport } from './routes/configuracion'
+import { Route as CosechaRouteImport } from './routes/cosecha'
 import { Route as InformacionRouteImport } from './routes/informacion'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as PlazosRouteImport } from './routes/plazos'
@@ -40,6 +41,11 @@ const CalendarioRoute = CalendarioRouteImport.update({
 const ConfiguracionRoute = ConfiguracionRouteImport.update({
   id: '/configuracion',
   path: '/configuracion',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CosechaRoute = CosechaRouteImport.update({
+  id: '/cosecha',
+  path: '/cosecha',
   getParentRoute: () => rootRouteImport,
 } as any)
 const InformacionRoute = InformacionRouteImport.update({
@@ -88,6 +94,7 @@ export interface FileRoutesByFullPath {
   '/calculadora': typeof CalculadoraRoute
   '/calendario': typeof CalendarioRoute
   '/configuracion': typeof ConfiguracionRoute
+  '/cosecha': typeof CosechaRoute
   '/informacion': typeof InformacionRoute
   '/login': typeof LoginRoute
   '/plazos': typeof PlazosRoute
@@ -102,6 +109,7 @@ export interface FileRoutesByTo {
   '/calculadora': typeof CalculadoraRoute
   '/calendario': typeof CalendarioRoute
   '/configuracion': typeof ConfiguracionRoute
+  '/cosecha': typeof CosechaRoute
   '/informacion': typeof InformacionRoute
   '/login': typeof LoginRoute
   '/plazos': typeof PlazosRoute
@@ -117,6 +125,7 @@ export interface FileRoutesById {
   '/calculadora': typeof CalculadoraRoute
   '/calendario': typeof CalendarioRoute
   '/configuracion': typeof ConfiguracionRoute
+  '/cosecha': typeof CosechaRoute
   '/informacion': typeof InformacionRoute
   '/login': typeof LoginRoute
   '/plazos': typeof PlazosRoute
@@ -133,6 +142,7 @@ export interface FileRouteTypes {
     | '/calculadora'
     | '/calendario'
     | '/configuracion'
+    | '/cosecha'
     | '/informacion'
     | '/login'
     | '/plazos'
@@ -147,6 +157,7 @@ export interface FileRouteTypes {
     | '/calculadora'
     | '/calendario'
     | '/configuracion'
+    | '/cosecha'
     | '/informacion'
     | '/login'
     | '/plazos'
@@ -161,6 +172,7 @@ export interface FileRouteTypes {
     | '/calculadora'
     | '/calendario'
     | '/configuracion'
+    | '/cosecha'
     | '/informacion'
     | '/login'
     | '/plazos'
@@ -176,6 +188,7 @@ export interface RootRouteChildren {
   CalculadoraRoute: typeof CalculadoraRoute
   CalendarioRoute: typeof CalendarioRoute
   ConfiguracionRoute: typeof ConfiguracionRoute
+  CosechaRoute: typeof CosechaRoute
   InformacionRoute: typeof InformacionRoute
   LoginRoute: typeof LoginRoute
   PlazosRoute: typeof PlazosRoute
@@ -214,6 +227,13 @@ declare module '@tanstack/react-router' {
       path: '/configuracion'
       fullPath: '/configuracion'
       preLoaderRoute: typeof ConfiguracionRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cosecha': {
+      id: '/cosecha'
+      path: '/cosecha'
+      fullPath: '/cosecha'
+      preLoaderRoute: typeof CosechaRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/informacion': {
@@ -280,6 +300,7 @@ const rootRouteChildren: RootRouteChildren = {
   CalculadoraRoute: CalculadoraRoute,
   CalendarioRoute: CalendarioRoute,
   ConfiguracionRoute: ConfiguracionRoute,
+  CosechaRoute: CosechaRoute,
   InformacionRoute: InformacionRoute,
   LoginRoute: LoginRoute,
   PlazosRoute: PlazosRoute,

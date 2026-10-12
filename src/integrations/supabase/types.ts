@@ -50,6 +50,24 @@ export type Database = {
         }
         Relationships: []
       }
+      cosechas: {
+        Row: {
+          data: Json
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          data: Json
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          data?: Json
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       cuadros: {
         Row: {
           data: Json
