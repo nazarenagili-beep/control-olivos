@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { SimpleSelect, haDeFila } from "@/components/ov";
 import { cn } from "@/lib/utils";
+import { AlertaPlazos } from "@/components/AlertaPlazos";
 
 type Zona = "A" | "B" | "AB";
 
@@ -96,6 +97,7 @@ export function ParteDiario({ onClose }: { onClose: () => void }) {
               </div>
             </section>
           )}
+          {tarea && nums.length > 0 && (tarea.tipo === "tratamiento" || tarea.tipo === "abonado") && <AlertaPlazos numeros={nums} />}
           <Button className="h-14 w-full text-lg" disabled={!tarea || !nums.length} onClick={guardar}>Guardar trabajo</Button>
         </div>
       </DialogContent>

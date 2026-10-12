@@ -7,6 +7,7 @@ import { ars, fmt, num } from "@/lib/logic";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { StockTrabajador } from "@/components/StockTrabajador";
 import { Field, PageHeader, SimpleSelect, Status } from "@/components/ov";
 
 export const Route = createFileRoute("/stock")({
@@ -22,7 +23,8 @@ function Stock() {
   const [precio, setPrecio] = useState("");
   const [fecha, setFecha] = useState(s.hoy);
   const [nota, setNota] = useState("");
-  if (!s.isAdmin) return <p className="ov-card p-8 text-center">Solo la administradora puede ver el stock.</p>;
+  if (!s.isAdmin) return <StockTrabajador />;
+  const avisos = s.productos.filter((p) => p.falta);
 
   const guardar = () => {
     const c = Number(cant);
@@ -50,6 +52,20 @@ function Stock() {
   return (
     <>
       <PageHeader title="Stock" actions={<><Button variant="outline" onClick={() => setModo("ajuste")}>Ajuste manual</Button><Button onClick={() => setModo("compra")}>Registrar compra</Button></>} />
+      {avisos.length > 0 && (
+        <div className="mb-6 rounded-lg border-2 border-danger-border bg-danger/10 p-4">
+          <h2 className="mb-2 text-xl">Avisos de que falta producto</h2>
+          <ul className="space-y-2">
+            {avisos.map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center gap-2 text-sm">
+                <strong className="text-foreground">{p.nombre_comercial}</strong>
+                <span className="text-muted-foreground">· {fmt(p.falta!.fecha)} · {s.usuarios.find((u) => u.id === p.falta!.por)?.nombre ?? ""}{p.falta!.nota ? ` · ${p.falta!.nota}` : ""}</span>
+                <Button size="sm" variant="outline" className="ml-auto" onClick={() => s.saveProducto({ ...p, falta: null })}>Ya está comprado</Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
       <div className="ov-card mb-6 overflow-x-auto">
         <table className="w-full text-sm">
           <thead className="bg-ov-beige-light text-left"><tr><th className="p-3">Producto</th><th className="p-3">Stock</th><th className="p-3">Mínimo</th><th className="p-3 w-48">Nivel</th><th className="p-3">Valor</th></tr></thead>

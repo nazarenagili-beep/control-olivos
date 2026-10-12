@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { PageHeader, seccionesTexto } from "@/components/ov";
 import { CampoMapa } from "@/components/CampoMapa";
 import { ParteDiario } from "@/components/ParteDiario";
+import { AlertaPlazos } from "@/components/AlertaPlazos";
 
 export function InicioTrabajador() {
   const s = useStore();
@@ -22,6 +23,7 @@ export function InicioTrabajador() {
         <Plus className="size-6" /> Anotar trabajo de hoy
       </Button>
 
+      <div className="mb-6"><AlertaPlazos /></div>
       <section className="ov-card mb-6 p-4">
         <h2 className="mb-3 text-2xl">Lo que anotaste estos 7 días</h2>
         {mios.length === 0 ? (
