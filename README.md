@@ -1,26 +1,74 @@
-# Cuadro control - olivos
+# Cuaderno de campo – Olivares Villairenses
 
-Implement exactly the screenshot and nothing else
+Aplicación web instalable en el móvil (PWA) para controlar las labores, los productos, el stock y la cosecha de una finca de olivos en Villa Iris (Argentina).
 
-This project was built with [Lovable](https://lovable.dev).
+**App desplegada:** https://control-olivos.lovable.app
 
-**Live app**: https://control-olivos.lovable.app
+## Problema que resuelve
 
-## Build with Lovable
+La dueña no sabía de un vistazo qué se había hecho, en qué filas y qué faltaba por hacer. El encargado necesita anotar el trabajo del día con pocos toques desde el móvil, sin planillas ni papeles.
 
-Continue developing this project in the [Lovable editor](https://lovable.dev/projects/6027828b-05f9-4f0e-a774-f6bc9654f584).
+## Roles
 
-- **Ship faster**: describe what you want to build and Lovable handles the code.
-- **Stay in sync**: every change made in Lovable is committed straight to this repository.
-- **Full ownership**: this code is yours. Push to `main` on GitHub and your changes sync back into Lovable, ready for your next prompt.
+- **Administradora:** panel de avance por tarea, productos, plazos de seguridad, stock, cosecha y rendimiento, configuración y usuarios.
+- **Encargado (rol «campo»):** anotar el trabajo del día, guía de productos, calculadora de dosis, stock y alertas de plazos.
 
-## Development
+## La finca
 
-Prefer working locally? You need Node.js and npm — [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating).
+- 5 hectáreas, 35 filas y 34 olivos por fila.
+- Cada fila se divide en **zona A** (izquierda, 17 olivos) y **zona B** (derecha, 17 olivos).
+- Hectáreas 1 a 3 productivas (filas 1 a 21).
+- Hectáreas 4 y 5 jóvenes (filas 22 a 35).
+
+## Funciones principales
+
+- **Plan anual** adaptado al hemisferio sur, con tareas recurrentes por estación.
+- **Registro de trabajo** por fecha, tarea, hectárea, fila y zona, con un historial que no se borra.
+- **Panel de avance** por tarea con las filas hechas y las pendientes.
+- **Guía de productos** y **calculadora de dosis**.
+- **Plazos de seguridad** por fila, con alertas antes de aplicar productos o fertilizar.
+- **Stock** con compras, avisos de faltante y descuento automático al aplicar.
+- **Cosecha y rendimiento**: kilos de aceituna, litros de aceite y rendimiento calculado.
+- **Invitación de usuarios** por parte de la administradora.
+- **PWA**: se instala en el teléfono y se abre a pantalla completa.
+
+## Stack
+
+- TanStack Start y TanStack Router
+- React 19 y TypeScript
+- Tailwind CSS 4 y shadcn/ui
+- Lovable Cloud (PostgreSQL, autenticación y políticas RLS)
+- Vitest
+
+## Estructura del proyecto
+
+```text
+src/routes/          Páginas de la aplicación
+src/components/      Componentes de interfaz
+src/lib/logic.ts     Cálculos de dosis, fechas y plazos
+src/lib/store.tsx    Estado y sincronización con la base de datos
+drizzle/migrations/  Esquema de la base de datos
+```
+
+## Seguridad
+
+- No hay registro público: solo pueden crear cuenta el email de la administradora y los emails invitados.
+- Políticas RLS activas en todas las tablas.
+- La tabla de registros de trabajo no admite edición ni borrado.
+
+## Cuentas de prueba
+
+Las cuentas de prueba para el jurado están en la documentación técnica del hackathon.
+
+## Desarrollo local
 
 ```sh
-git clone <this-repository-url>
-cd <repository-name>
 npm i
-npm run dev
+npm run dev     # servidor de desarrollo
+npm run build   # compilación de producción
+npm test        # pruebas
 ```
+
+---
+
+Proyecto desarrollado íntegramente con Lovable para el Hackathon de Vibe Coding del Máster en Inteligencia Artificial de Big School (Edición 7).
