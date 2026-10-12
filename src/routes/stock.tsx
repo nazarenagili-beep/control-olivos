@@ -23,21 +23,47 @@ function Stock() {
   const [precio, setPrecio] = useState("");
   const [fecha, setFecha] = useState(s.hoy);
   const [nota, setNota] = useState("");
+  const [forma, setForma] = useState<"total" | "sumar" | "restar">("total");
+  const [editId, setEditId] = useState<string | null>(null);
   if (!s.isAdmin) return <StockTrabajador />;
   const avisos = s.productos.filter((p) => p.falta);
+  const prodSel = s.productos.find((p) => p.id === prod);
+  const editando = s.movimientos.find((m) => m.id === editId);
+
+  const cerrar = () => { setModo(null); setEditId(null); setCant(""); setPrecio(""); setNota(""); setForma("total"); };
+  const abrirEdicion = (id: string) => {
+    const m = s.movimientos.find((x) => x.id === id);
+    if (!m || m.tipo === "aplicacion") return;
+    setEditId(id); setModo(m.tipo === "compra" ? "compra" : "ajuste"); setProd(m.producto_id);
+    setFecha(m.fecha); setNota(m.nota ?? "");
+    setForma(m.cantidad < 0 ? "restar" : "sumar");
+    setCant(String(Math.abs(m.cantidad))); setPrecio(m.precio_total ? String(m.precio_total) : "");
+  };
 
   const guardar = () => {
     const c = Number(cant);
-    if (!c) return toast.error("Indica una cantidad.");
+    if (cant === "" || !Number.isFinite(c) || c < 0) return toast.error("Indica una cantidad.");
     if (modo === "compra") {
+      if (!(c > 0)) return toast.error("Indica una cantidad.");
       if (!(Number(precio) > 0)) return toast.error("Indica el precio total.");
-      s.addCompra(prod, c, Number(precio), fecha, nota);
+      if (editando) s.editMovimiento(editando.id, { cantidad: c, precio_total: Number(precio), fecha, nota });
+      else s.addCompra(prod, c, Number(precio), fecha, nota);
     } else {
-      if (!nota.trim()) return toast.error("El motivo del ajuste es obligatorio.");
-      s.addAjuste(prod, c, fecha, nota);
+      const delta = forma === "total" ? c - (prodSel?.stock_actual ?? 0) : forma === "sumar" ? c : -c;
+      if (editando) s.editMovimiento(editando.id, { cantidad: delta, fecha, nota: nota || "Ajuste" });
+      else {
+        if (delta === 0) return toast.error("El stock ya es esa cantidad.");
+        s.addAjuste(prod, delta, fecha, nota.trim() || (forma === "total" ? "Recuento en el galpón" : "Ajuste"));
+      }
     }
-    toast.success("Movimiento registrado");
-    setModo(null); setCant(""); setPrecio(""); setNota("");
+    toast.success(editando ? "Movimiento corregido" : "Movimiento registrado");
+    cerrar();
+  };
+  const borrar = () => {
+    if (!editando || !confirm("¿Borrar este movimiento? El stock se recalcula.")) return;
+    s.deleteMovimiento(editando.id);
+    toast.success("Movimiento borrado");
+    cerrar();
   };
 
   const gasto = new Map<string, number>();
