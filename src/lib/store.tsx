@@ -1,14 +1,10 @@
-import { createContext, useContext, useState, type ReactNode } from "react";
+import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from "react";
+import { useNavigate, useRouterState } from "@tanstack/react-router";
+import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
 import {
-  aplicacionesIniciales,
   configInicial,
-  cuadrosIniciales,
-  filasIniciales,
   generarPlanAnual,
-  movimientosIniciales,
-  productosIniciales,
-  tareasIniciales,
-  usuariosIniciales,
   type Aplicacion,
   type ConfigAvisos,
   type Cuadro,
@@ -31,30 +27,89 @@ export interface Registro {
   usuario_id: string;
 }
 
-function registrosIniciales(ts: Tarea[]): Registro[] {
-  const hace = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
-  return ts
-    .filter((t) => t.secciones_hechas.length)
-    .map((t, i) => ({ id: `r-ini-${i}`, fecha: hace(2 + i * 5), tarea_id: t.id, titulo: t.titulo, tipo: t.tipo, secciones: t.secciones_hechas, accion: "hecho" as const, usuario_id: t.responsable_id ?? "u-admin" }));
-}
+const nid = (p: string) => `${p}-${crypto.randomUUID()}`;
 
-let seq = 1000;
-const nid = (p: string) => `${p}-${++seq}`;
+type Tabla = "cuadros" | "filas" | "tareas" | "productos" | "aplicaciones" | "movimientos" | "registros" | "config";
+const db = supabase as unknown as { from: (t: string) => any }; // tablas genéricas (id, data jsonb)
+
+/** Guarda en la base de datos los elementos nuevos/cambiados y borra los quitados (comparando por referencia). */
+function useSync<T extends { id: string }>(tabla: Tabla, items: T[], listo: boolean, prev: React.MutableRefObject<T[] | null>) {
+  useEffect(() => {
+    if (!listo || prev.current === null) return;
+    const antes = prev.current;
+    prev.current = items;
+    if (antes === items) return;
+    const viejos = new Map(antes.map((x) => [x.id, x]));
+    const cambiados = items.filter((x) => viejos.get(x.id) !== x);
+    const ids = new Set(items.map((x) => x.id));
+    const quitados = antes.filter((x) => !ids.has(x.id)).map((x) => x.id);
+    const err = (e: { message: string } | null) => e && toast.error(`No se pudo guardar: ${e.message}`);
+    if (cambiados.length) db.from(tabla).upsert(cambiados.map((x) => ({ id: x.id, data: x, updated_at: new Date().toISOString() }))).then(({ error }: any) => err(error));
+    if (quitados.length) db.from(tabla).delete().in("id", quitados).then(({ error }: any) => err(error));
+  }, [items, listo]); // eslint-disable-line react-hooks/exhaustive-deps
+}
 
 function useStoreState() {
   const [hoy] = useState(() => hoyAR());
-  const [usuarios, setUsuarios] = useState<Usuario[]>(usuariosIniciales);
-  const [currentUserId, setCurrentUserId] = useState("u-admin");
-  const [cuadros, setCuadros] = useState<Cuadro[]>(cuadrosIniciales);
-  const [filas, setFilas] = useState<Fila[]>(filasIniciales);
-  const [tareas, setTareas] = useState<Tarea[]>(() => tareasIniciales(hoyAR()));
-  const [productos, setProductos] = useState<Producto[]>(productosIniciales);
-  const [aplicaciones, setAplicaciones] = useState<Aplicacion[]>(aplicacionesIniciales);
-  const [movimientos, setMovimientos] = useState<Movimiento[]>(movimientosIniciales);
-  const [registros, setRegistros] = useState<Registro[]>(() => registrosIniciales(tareas));
-  const [config, setConfig] = useState<ConfigAvisos>(configInicial);
+  const [usuarios, setUsuarios] = useState<Usuario[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [listo, setListo] = useState(false);
+  const [sinAcceso, setSinAcceso] = useState(false);
+  const [cuadros, setCuadros] = useState<Cuadro[]>([]);
+  const [filas, setFilas] = useState<Fila[]>([]);
+  const [tareas, setTareas] = useState<Tarea[]>([]);
+  const [productos, setProductos] = useState<Producto[]>([]);
+  const [aplicaciones, setAplicaciones] = useState<Aplicacion[]>([]);
+  const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
+  const [registros, setRegistros] = useState<Registro[]>([]);
+  const [configs, setConfigs] = useState<(ConfigAvisos & { id: string })[]>([]);
+  const config: ConfigAvisos = configs[0] ?? configInicial;
+  const setConfig = (c: ConfigAvisos) => setConfigs([{ ...c, id: "main" }]);
 
-  const user = usuarios.find((u) => u.id === currentUserId)!;
+  const refs = {
+    cuadros: useRef<Cuadro[] | null>(null), filas: useRef<Fila[] | null>(null), tareas: useRef<Tarea[] | null>(null),
+    productos: useRef<Producto[] | null>(null), aplicaciones: useRef<Aplicacion[] | null>(null), movimientos: useRef<Movimiento[] | null>(null),
+    registros: useRef<Registro[] | null>(null), config: useRef<(ConfigAvisos & { id: string })[] | null>(null),
+  };
+
+  const cargar = async (uid: string) => {
+    setListo(false);
+    const leer = async <T,>(t: Tabla): Promise<T[]> => {
+      const { data, error } = await db.from(t).select("data");
+      if (error) throw error;
+      return (data ?? []).map((r: { data: T }) => r.data);
+    };
+    try {
+      const [cu, fi, ta, pr, ap, mo, re, co, pe, ro] = await Promise.all([
+        leer<Cuadro>("cuadros"), leer<Fila>("filas"), leer<Tarea>("tareas"), leer<Producto>("productos"), leer<Aplicacion>("aplicaciones"),
+        leer<Movimiento>("movimientos"), leer<Registro>("registros"), leer<ConfigAvisos & { id: string }>("config"),
+        supabase.from("profiles").select("*"), supabase.from("user_roles").select("*"),
+      ]);
+      const us: Usuario[] = (pe.data ?? []).map((p) => ({
+        id: p.id, nombre: p.nombre, email: p.email, activo: p.activo,
+        rol: (ro.data ?? []).some((r) => r.user_id === p.id && r.role === "admin") ? "admin" : "campo",
+      }));
+      if (!us.some((u) => u.id === uid && u.activo)) { setSinAcceso(true); return; }
+      const ordenFecha = <T extends { fecha: string },>(x: T[]) => x.sort((a, b) => b.fecha.localeCompare(a.fecha));
+      refs.cuadros.current = cu; refs.filas.current = fi; refs.tareas.current = ta; refs.productos.current = pr;
+      refs.aplicaciones.current = ordenFecha(ap); refs.movimientos.current = ordenFecha(mo); refs.registros.current = ordenFecha(re); refs.config.current = co;
+      setCuadros(cu); setFilas(fi); setTareas(ta); setProductos(pr); setAplicaciones(ap); setMovimientos(mo); setRegistros(re); setConfigs(co);
+      setUsuarios(us); setCurrentUserId(uid); setSinAcceso(false); setListo(true);
+    } catch (e) {
+      toast.error(`No se pudieron cargar los datos: ${(e as Error).message}`);
+    }
+  };
+
+  useSync("cuadros", cuadros, listo, refs.cuadros);
+  useSync("filas", filas, listo, refs.filas);
+  useSync("tareas", tareas, listo, refs.tareas);
+  useSync("productos", productos, listo, refs.productos);
+  useSync("aplicaciones", aplicaciones, listo, refs.aplicaciones);
+  useSync("movimientos", movimientos, listo, refs.movimientos);
+  useSync("registros", registros, listo, refs.registros);
+  useSync("config", configs, listo, refs.config);
+
+  const user = usuarios.find((u) => u.id === currentUserId) ?? { id: "", nombre: "", email: "", rol: "campo" as const, activo: false };
   const isAdmin = user.rol === "admin";
 
   const saveTarea = (t: Tarea) =>
@@ -70,7 +125,7 @@ function useStoreState() {
         estado,
         nota_cierre: nota ?? t.nota_cierre,
         foto_nombre: foto ?? t.foto_nombre,
-        ...(estado === "hecha" ? { completada_en: new Date().toISOString(), completada_por: currentUserId } : {}),
+        ...(estado === "hecha" ? { completada_en: new Date().toISOString(), completada_por: currentUserId ?? "" } : {}),
       };
       let next = ts.map((x) => (x.id === id ? upd : x));
       if (estado === "hecha" && t.estado !== "hecha" && t.recurrencia !== "ninguna") {
@@ -106,8 +161,8 @@ function useStoreState() {
       const quitadas = prev.secciones_hechas.filter((x) => !ahora.has(x));
       const nuevos: Registro[] = [];
       const fecha = new Date().toISOString();
-      if (hechas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: hechas, accion: "hecho", usuario_id: currentUserId });
-      if (quitadas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: quitadas, accion: "desmarcado", usuario_id: currentUserId });
+      if (hechas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: hechas, accion: "hecho", usuario_id: currentUserId ?? "" });
+      if (quitadas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: quitadas, accion: "desmarcado", usuario_id: currentUserId ?? "" });
       if (nuevos.length) setRegistros((r) => [...nuevos, ...r]);
     }
     setTareas((ts) => ts.map((t) => (t.id === id ? { ...t, secciones_hechas: secs, estado: t.estado === "pendiente" && secs.length ? "en_curso" : t.estado } : t)));
@@ -166,11 +221,19 @@ function useStoreState() {
     return creadas;
   };
 
-  const saveUsuario = (u: Usuario) =>
-    setUsuarios((us) => (us.some((x) => x.id === u.id) ? us.map((x) => (x.id === u.id ? u : x)) : [...us, { ...u, id: nid("u") }]));
+  const saveUsuario = async (u: Usuario) => {
+    if (!u.id) {
+      const { error } = await supabase.from("invitaciones").upsert({ email: u.email.trim().toLowerCase(), nombre: u.nombre, rol: u.rol });
+      if (error) return toast.error(error.message);
+      return toast.success(`Invitación creada. ${u.email} ya puede crear su cuenta en la pantalla de acceso.`);
+    }
+    const { error } = await supabase.from("profiles").update({ activo: u.activo, nombre: u.nombre }).eq("id", u.id);
+    if (error) return toast.error(error.message);
+    setUsuarios((us) => us.map((x) => (x.id === u.id ? u : x)));
+  };
 
   return {
-    hoy, usuarios, user, isAdmin, setCurrentUserId, cuadros, setCuadros, filas, setFilas, tareas, productos, aplicaciones,
+    hoy, usuarios, user, isAdmin, listo, sinAcceso, cargar, currentUserId, cuadros, setCuadros, filas, setFilas, tareas, productos, aplicaciones,
     movimientos, registros, config, setConfig, saveTarea, deleteTarea, setEstadoTarea, setSeccionesHechas, addAplicacion, deleteAplicacion, saveProducto,
     addCompra, addAjuste, crearFilasMasivo, regenerarPlan, saveUsuario,
   };
@@ -182,7 +245,30 @@ const g = globalThis as unknown as { __ovStoreCtx?: ReturnType<typeof createCont
 const Ctx = (g.__ovStoreCtx ??= createContext<Store | null>(null));
 export function StoreProvider({ children }: { children: ReactNode }) {
   const s = useStoreState();
-  return <Ctx.Provider value={s}>{children}</Ctx.Provider>;
+  const navigate = useNavigate();
+  const path = useRouterState({ select: (r) => r.location.pathname });
+  const [sesion, setSesion] = useState<"cargando" | "no" | "si">("cargando");
+  useEffect(() => {
+    const aplicar = (uid: string | null) => {
+      if (uid) { setSesion("si"); s.cargar(uid); } else setSesion("no");
+    };
+    supabase.auth.getSession().then(({ data }) => aplicar(data.session?.user.id ?? null));
+    const { data } = supabase.auth.onAuthStateChange((ev, ses) => {
+      if (ev === "SIGNED_IN" || ev === "SIGNED_OUT") aplicar(ses?.user.id ?? null);
+    });
+    return () => data.subscription.unsubscribe();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (sesion === "no" && path !== "/login") navigate({ to: "/login" });
+  }, [sesion, path]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const espera = (txt: ReactNode) => <div className="flex min-h-screen items-center justify-center p-6 text-center text-muted-foreground">{txt}</div>;
+  let contenido: ReactNode = children;
+  if (path !== "/login") {
+    if (s.sinAcceso) contenido = espera(<div>Tu usuario no está activo. Pide acceso a la administradora.<br /><button className="mt-3 underline" onClick={() => supabase.auth.signOut()}>Salir</button></div>);
+    else if (sesion !== "si" || !s.listo) contenido = espera("Cargando el cuaderno de campo…");
+  }
+  return <Ctx.Provider value={s}>{contenido}</Ctx.Provider>;
 }
 export function useStore() {
   const s = useContext(Ctx);
