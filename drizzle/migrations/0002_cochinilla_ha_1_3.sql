@@ -1,0 +1,1 @@
+update public.tareas set data = jsonb_set(jsonb_set(data,'{cuadro_id}','"c-prod"'),'{descripcion}', to_jsonb(coalesce(data->>'descripcion','') || ' Solo hectáreas 1, 2 y 3.')), updated_at = now() where id like '%p-cochinilla';

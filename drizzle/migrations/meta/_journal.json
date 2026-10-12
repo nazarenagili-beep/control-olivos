@@ -15,6 +15,13 @@
       "when": 1791800642768,
       "tag": "0001_cosechas",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1791801564855,
+      "tag": "0002_cochinilla_ha_1_3",
+      "breakpoints": true
     }
   ]
 }
