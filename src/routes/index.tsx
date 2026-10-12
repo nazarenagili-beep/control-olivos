@@ -181,7 +181,7 @@ function InicioAdmin() {
                     <TipoChip tipo={t.tipo} />
                     <span className="text-base font-medium">{t.titulo}</span>
                   </div>
-                  <span className="text-sm text-muted-foreground">{h} de {its.length} medias filas · {pct}%</span>
+                  <span className="text-sm text-muted-foreground">{h / 2} de {its.length / 2} filas hechas · {pct}%</span>
                 </div>
                 <div className="mt-2 h-2 overflow-hidden rounded-full bg-ov-beige-light">
                   <div className="h-full bg-ov-olive-light" style={{ width: `${pct}%` }} />
@@ -197,7 +197,7 @@ function InicioAdmin() {
                   <div className="flex gap-2">
                     <Circle className="mt-0.5 size-4 shrink-0 text-danger" />
                     <span>
-                      <b>Falta:</b> {pend.length ? textoFilas(pend) : "completo"}
+                      <b>Falta:</b> {pend.length ? textoFilas(pend) : "nada, la tarea está terminada"}
                       <span className="block text-xs text-muted-foreground">Plazo hasta {fmt(t.fecha_fin)}</span>
                     </span>
                   </div>
