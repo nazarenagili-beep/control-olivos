@@ -6,7 +6,7 @@ import { useStore } from "@/lib/store";
 import { addDays, fmt } from "@/lib/logic";
 import { TIPO_LABEL, type Tarea, type TipoTarea } from "@/lib/data";
 import { PageHeader, TipoChip, haDeFila } from "@/components/ov";
-import { CampoMapa } from "@/components/CampoMapa";
+import { AvanceTareas } from "@/components/AvanceTareas";
 import { TaskDialog } from "@/components/TaskDialog";
 import { InicioTrabajador } from "@/components/InicioTrabajador";
 
@@ -199,7 +199,7 @@ function InicioAdmin() {
         </div>
       </section>
 
-      <CampoMapa />
+      <AvanceTareas />
       {sel && <TaskDialog tarea={sel} onClose={() => setSel(null)} />}
     </>
   );
