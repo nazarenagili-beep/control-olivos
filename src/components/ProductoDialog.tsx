@@ -25,9 +25,7 @@ export function ProductoDialog({ producto, onClose }: { producto: Producto; onCl
   const guardar = () => {
     if (!p.nombre_comercial.trim()) return setErr("Indica el nombre comercial.");
     if (!Number.isFinite(p.plazo_seguridad_dias) || p.plazo_seguridad_dias < 0) return setErr("Indica el plazo de seguridad. Si el producto no tiene, pon 0.");
-    const delta = p.id ? p.stock_actual - producto.stock_actual : 0;
-    s.saveProducto(p.id ? { ...p, stock_actual: producto.stock_actual } : p);
-    if (p.id && delta !== 0) s.addAjuste(p.id, delta, s.hoy, "Stock corregido en la ficha del producto");
+    s.saveProducto(p);
     toast.success("Producto guardado");
     onClose();
   };
@@ -43,8 +41,7 @@ export function ProductoDialog({ producto, onClose }: { producto: Producto; onCl
           <Field label="Dosis recomendada"><Input type="number" step="any" className="h-11" value={p.dosis_recomendada || ""} onChange={(e) => up({ dosis_recomendada: Number(e.target.value) })} /></Field>
           <Field label="Unidad de dosis"><SimpleSelect value={p.unidad_dosis} onChange={(v) => up({ unidad_dosis: v })} options={UNIDAD_OPTS} /></Field>
           <Field label="Unidad de stock"><SimpleSelect value={p.unidad_stock} onChange={(v) => up({ unidad_stock: v })} options={[{ value: "L", label: "Litros (L)" }, { value: "kg", label: "Kilos (kg)" }]} /></Field>
-          <Field label={`Stock actual (lo que tienes hoy, en ${p.unidad_stock})`}><Input type="number" step="any" min={0} className="h-11" value={Number.isFinite(p.stock_actual) ? p.stock_actual : ""} onChange={(e) => up({ stock_actual: Number(e.target.value) })} /></Field>
-          <Field label="Stock mínimo (para avisar cuando queda poco)"><Input type="number" step="any" className="h-11" value={p.stock_minimo || ""} onChange={(e) => up({ stock_minimo: Number(e.target.value) })} /></Field>
+          <Field label="Stock mínimo"><Input type="number" step="any" className="h-11" value={p.stock_minimo || ""} onChange={(e) => up({ stock_minimo: Number(e.target.value) })} /></Field>
           <Field label="Precio por unidad (ARS)"><Input type="number" className="h-11" value={p.precio_por_unidad || ""} onChange={(e) => up({ precio_por_unidad: Number(e.target.value) })} /></Field>
           <Field label="Ficha técnica (PDF, máx. 10 MB)">
             <label className="flex min-h-11 cursor-pointer items-center gap-2 rounded-md border border-dashed border-border bg-card px-3 text-sm">
