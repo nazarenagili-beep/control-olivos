@@ -17,7 +17,7 @@ import { cn } from "@/lib/utils";
 import { useStore } from "@/lib/store";
 import { Sheet, SheetContent, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { supabase } from "@/integrations/supabase/client";
 
 const NAV = [
   { to: "/", label: "Inicio", icon: Home },
@@ -62,16 +62,16 @@ function Nav({ onNavigate }: { onNavigate?: () => void }) {
           );
         })}
       </nav>
-      <Link to="/login" className="m-3 flex min-h-11 items-center gap-3 rounded-md px-3 text-sm hover:bg-sidebar-border">
+      <button onClick={() => supabase.auth.signOut()} className="m-3 flex min-h-11 items-center gap-3 rounded-md px-3 text-left text-sm hover:bg-sidebar-border">
         <LogOut className="size-4" /> Salir
-      </Link>
+      </button>
     </div>
   );
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(false);
-  const { user, usuarios, setCurrentUserId } = useStore();
+  const { user } = useStore();
   return (
     <div className="min-h-screen">
       <aside className="fixed inset-y-0 left-0 hidden w-64 lg:block">
@@ -89,19 +89,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Menu />
           </Button>
           <div className="flex-1" />
-          <span className="hidden text-xs text-muted-foreground sm:inline">Ver como (demo):</span>
-          <Select value={user.id} onValueChange={setCurrentUserId}>
-            <SelectTrigger className="h-11 w-56 bg-card">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {usuarios.filter((u) => u.activo).map((u) => (
-                <SelectItem key={u.id} value={u.id}>
-                  {u.nombre} · {u.rol === "admin" ? "Admin" : "Campo"}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <span className="text-sm text-muted-foreground">{user.nombre} · {user.rol === "admin" ? "Administradora" : "Campo"}</span>
         </header>
         <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">{children}</main>
       </div>
