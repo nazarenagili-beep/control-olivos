@@ -27,7 +27,7 @@ const NAV = [
   { to: "/calculadora", label: "Calculadora", icon: Calculator },
   { to: "/productos", label: "Productos", icon: Package, admin: true },
   { to: "/plazos", label: "Plazos de seguridad", icon: ShieldCheck, admin: true },
-  { to: "/stock", label: "Stock", icon: Warehouse, admin: true },
+  { to: "/stock", label: "Stock", icon: Warehouse },
   { to: "/configuracion", label: "Configuración", icon: Settings, admin: true },
 ] as const;
 

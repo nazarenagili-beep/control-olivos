@@ -71,6 +71,8 @@ export interface Producto {
   precio_por_unidad: number;
   plazo_seguridad_dias: number;
   ficha_tecnica_nombre?: string;
+  /** Aviso del trabajador: se está acabando o falta. */
+  falta?: { fecha: string; por: string; nota: string } | null;
   activo: boolean;
   notas: string;
 }
