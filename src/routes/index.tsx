@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMemo, useState, type ReactNode } from "react";
-import { CheckCircle2, Circle } from "lucide-react";
+import { CheckCircle2, Circle, Filter, X } from "lucide-react";
 import { pageHead } from "@/lib/head";
 import { useStore } from "@/lib/store";
 import { addDays, fmt } from "@/lib/logic";
@@ -41,11 +41,12 @@ function Inicio() {
   const s = useStore();
   const [dias, setDias] = useState(7);
   const [tipo, setTipo] = useState<TipoTarea | "todos">("todos");
-  const [estado, setEstado] = useState<"todas" | "hecho" | "pendiente">("todas");
+  const [estado, setEstado] = useState<"todas" | "hecho" | "pendiente">("hecho");
   const [ha, setHa] = useState<number>(0);
   const [fila, setFila] = useState<number>(0);
   const [lado, setLado] = useState<"ambos" | "A" | "B">("ambos");
   const [sel, setSel] = useState<Tarea | null>(null);
+  const [verFiltros, setVerFiltros] = useState(false);
   const nombre = (id?: string | null) => (id ? s.usuarios.find((u) => u.id === id)?.nombre ?? null : null);
 
   const desde = addDays(s.hoy, -dias);
@@ -80,6 +81,7 @@ function Inicio() {
       (!fila || i.fila === fila) &&
       (lado === "ambos" || i.lado === lado),
   );
+  const activos = [dias !== 7, estado !== "hecho", tipo !== "todos", ha !== 0, fila !== 0, lado !== "ambos"].filter(Boolean).length;
   const hechos = filtrados.filter((i) => i.hecho).length;
   const pendientes = filtrados.length - hechos;
 
@@ -108,7 +110,22 @@ function Inicio() {
     <>
       <PageHeader title={`Buen día, ${s.user.nombre.split(" ")[0]}`} subtitle={`Hoy es ${fmt(s.hoy)} · Villa Iris`} />
 
-      <section className="ov-card mb-6 grid gap-4 p-5 md:grid-cols-2">
+      <div className="mb-3 flex flex-wrap items-center gap-3">
+        <button onClick={() => setVerFiltros((v) => !v)} className="flex items-center gap-2 rounded-full border border-border bg-card px-4 py-2 text-sm hover:bg-muted" aria-label="Filtros">
+          {verFiltros ? <X className="size-4" /> : <Filter className="size-4" />} Filtros
+          {activos > 0 && <span className="rounded-full bg-primary px-2 text-xs text-primary-foreground">{activos}</span>}
+        </button>
+        <span className="text-sm text-muted-foreground">
+          {estado === "hecho" ? "Lo realizado" : estado === "pendiente" ? "Lo pendiente" : "Todo"} en {dias === 1 ? "el último día" : `los últimos ${dias} días`}
+          {tipo !== "todos" ? ` · ${TIPO_LABEL[tipo]}` : ""}{ha ? ` · Ha ${ha}` : ""}{fila ? ` · Fila ${fila}` : ""}{lado !== "ambos" ? ` · Zona ${lado}` : ""}
+        </span>
+        {activos > 0 && (
+          <button onClick={() => { setDias(7); setEstado("hecho"); setTipo("todos"); setHa(0); setFila(0); setLado("ambos"); }} className="text-sm underline">
+            Restablecer
+          </button>
+        )}
+      </div>
+      {verFiltros && <section className="ov-card mb-6 grid gap-4 p-5 md:grid-cols-2">
         <Chips label="Período" value={dias} onChange={setDias} opts={PERIODOS.map((d) => ({ v: d, l: d === 1 ? "1 día" : `${d} días` }))} />
         <Chips label="Estado" value={estado} onChange={setEstado} opts={[{ v: "todas", l: "Todas" }, { v: "hecho", l: "Realizadas" }, { v: "pendiente", l: "Pendientes" }]} />
         <Chips label="Tipo de tarea" value={tipo} onChange={setTipo} opts={[{ v: "todos" as const, l: "Todos" }, ...tiposPresentes.map((x) => ({ v: x, l: TIPO_LABEL[x] }))]} />
@@ -123,7 +140,7 @@ function Inicio() {
             ))}
           </select>
         </div>
-      </section>
+      </section>}
 
       <div className="mb-6 grid grid-cols-3 gap-3">
         <Box t="Realizado" v={hechos} tone="text-ov-olive-light">medias filas</Box>
