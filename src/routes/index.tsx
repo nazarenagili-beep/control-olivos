@@ -136,7 +136,7 @@ function Inicio() {
       </div>
 
       <CampoMapa />
-      {sel && <TaskDialog open tarea={sel} onClose={() => setSel(null)} />}
+      {sel && <TaskDialog tarea={sel} onClose={() => setSel(null)} />}
     </>
   );
 }
