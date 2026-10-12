@@ -79,19 +79,22 @@ function InicioAdmin() {
     return out;
   }, [s.tareas, s.registros, s.filas, dias]);
 
-  const filtrados = items.filter(
+  const base = items.filter(
     (i) =>
       (tipo === "todos" || i.tarea.tipo === tipo) &&
-      (estado === "todas" || (estado === "hecho" ? i.hecho : !i.hecho)) &&
       (!ha || i.ha === ha) &&
       (!fila || i.fila === fila) &&
       (lado === "ambos" || i.lado === lado),
   );
+  const pasaEstado = (i: Item) => estado === "todas" || (estado === "hecho" ? i.hecho : !i.hecho);
+  const filtrados = base.filter(pasaEstado);
   const activos = [dias !== 7, estado !== "hecho", tipo !== "todos", ha !== 0, fila !== 0, lado !== "ambos"].filter(Boolean).length;
   const hechos = filtrados.filter((i) => i.hecho).length;
   const pendientes = filtrados.length - hechos;
 
-  const porTarea = [...filtrados.reduce((m, i) => m.set(i.tarea.id, [...(m.get(i.tarea.id) ?? []), i]), new Map<string, Item[]>()).values()]
+  // Cada tarjeta muestra la tarea completa (hecho y lo que falta), aunque el filtro sea "Realizadas".
+  const porTarea = [...base.reduce((m, i) => m.set(i.tarea.id, [...(m.get(i.tarea.id) ?? []), i]), new Map<string, Item[]>()).values()]
+    .filter((its) => its.some(pasaEstado))
     .map((its) => ({ t: its[0].tarea, its, hechos: its.filter((i) => i.hecho).length }))
     .sort((a, b) => b.hechos / b.its.length - a.hechos / a.its.length);
 
