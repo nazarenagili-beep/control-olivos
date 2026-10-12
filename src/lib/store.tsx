@@ -215,6 +215,24 @@ function useStoreState() {
     setMovimientos((m) => [{ id: nid("m"), producto_id, tipo: "ajuste", cantidad, fecha, nota }, ...m]);
     setProductos((ps) => ps.map((p) => (p.id === producto_id ? { ...p, stock_actual: p.stock_actual + cantidad } : p)));
   };
+  const editMovimiento = (id: string, cambios: { cantidad: number; precio_total?: number; fecha: string; nota: string }) => {
+    const m = movimientos.find((x) => x.id === id);
+    if (!m || m.tipo === "aplicacion") return;
+    const delta = cambios.cantidad - m.cantidad;
+    setMovimientos((ms) => ms.map((x) => (x.id === id ? { ...x, ...cambios } : x)));
+    setProductos((ps) => ps.map((p) => {
+      if (p.id !== m.producto_id) return p;
+      const np = { ...p, stock_actual: p.stock_actual + delta };
+      if (m.tipo === "compra" && cambios.precio_total && cambios.cantidad > 0) np.precio_por_unidad = cambios.precio_total / cambios.cantidad;
+      return np;
+    }));
+  };
+  const deleteMovimiento = (id: string) => {
+    const m = movimientos.find((x) => x.id === id);
+    if (!m || m.tipo === "aplicacion") return;
+    setMovimientos((ms) => ms.filter((x) => x.id !== id));
+    setProductos((ps) => ps.map((p) => (p.id === m.producto_id ? { ...p, stock_actual: p.stock_actual - m.cantidad } : p)));
+  };
 
   const crearFilasMasivo = (cuadro_id: string, desde: number, hasta: number, olivos: number) =>
     setFilas((fs) => {
@@ -256,7 +274,7 @@ function useStoreState() {
     cosechas, saveCosecha, deleteCosecha,
     hoy, usuarios, user, isAdmin, listo, sinAcceso, cargar, currentUserId, cuadros, setCuadros, filas, setFilas, tareas, productos, aplicaciones,
     movimientos, registros, config, setConfig, saveTarea, deleteTarea, setEstadoTarea, setSeccionesHechas, addAplicacion, deleteAplicacion, saveProducto,
-    addCompra, addAjuste, crearFilasMasivo, regenerarPlan, saveUsuario,
+    addCompra, addAjuste, editMovimiento, deleteMovimiento, crearFilasMasivo, regenerarPlan, saveUsuario,
   };
 }
 
