@@ -66,8 +66,7 @@ function Login() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-primary px-4">
       <div className="w-full max-w-sm rounded-2xl bg-card p-8 shadow-xl">
-        <img src={logo.url} alt="Olivares Villairenses" className="mx-auto size-28" />
-        <h1 className="mt-2 text-center text-3xl">Cuaderno de campo</h1>
+        <h1 className="text-center text-3xl">Cuaderno de campo</h1>
         <p className="mb-6 text-center text-sm text-muted-foreground">{titulo}</p>
         <form className="space-y-4" onSubmit={(e) => { e.preventDefault(); enviar(); }}>
           {modo !== "nueva" && (
