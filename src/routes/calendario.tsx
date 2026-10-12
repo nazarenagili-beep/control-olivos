@@ -14,7 +14,7 @@ import { ParteDiario } from "@/components/ParteDiario";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/calendario")({
-  head: () => pageHead("Calendario", "Calendario anual de tareas por cuadro y fila del olivar."),
+  head: () => pageHead("Registro de tareas", "Anotar los trabajos del día y ver el plan anual por fila del olivar."),
   component: Calendario,
 });
 
@@ -87,8 +87,8 @@ function Calendario() {
   return (
     <>
       <PageHeader
-        title="Calendario"
-        subtitle="Tareas por cuadro, fila y zona"
+        title="Registro de tareas"
+        subtitle="Anota lo que hiciste hoy y consulta el plan por fila y zona"
         actions={
           <div className="flex flex-wrap gap-2">
             <Button size="lg" onClick={() => setParte(true)}><Plus /> Anotar trabajo de hoy</Button>
