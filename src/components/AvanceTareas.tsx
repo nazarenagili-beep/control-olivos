@@ -1,11 +1,11 @@
 import { useStore } from "@/lib/store";
-import { fmt } from "@/lib/logic";
+import { addDays, fmt } from "@/lib/logic";
 import { TipoChip } from "./ov";
 
 /** Tarjetas por tarea vigente: % hecho, filas hechas / faltan, última fecha. */
 export function AvanceTareas() {
   const s = useStore();
-  const activas = s.tareas.filter((t) => t.fecha_inicio <= s.hoy && t.fecha_fin >= s.hoy);
+  const activas = s.tareas.filter((t) => t.fecha_inicio <= addDays(s.hoy, 60) && t.fecha_fin >= addDays(s.hoy, -90));
 
   const datos = activas
     .map((t) => {
@@ -20,12 +20,12 @@ export function AvanceTareas() {
       const pct = secs.length ? Math.round((hechas.length / secs.length) * 100) : 0;
       return { t, pct, totalFilas, filasHechas, ultima };
     })
-    .sort((a, b) => a.pct - b.pct);
+    .sort((a, b) => Number(a.t.fecha_inicio > s.hoy) - Number(b.t.fecha_inicio > s.hoy) || a.pct - b.pct);
 
   return (
     <section>
-      <h3 className="mb-1 text-xl">Avance de las tareas de ahora</h3>
-      <p className="mb-4 text-sm text-muted-foreground">Tareas previstas para hoy en el plan y cuánto se ha hecho de cada una.</p>
+      <h3 className="mb-1 text-xl">Avance de las tareas</h3>
+      <p className="mb-4 text-sm text-muted-foreground">Tareas en curso, las de los últimos 3 meses y las que empiezan pronto, con cuánto se ha hecho de cada una.</p>
       {datos.length === 0 && <p className="text-sm text-muted-foreground">No hay tareas previstas para estas fechas.</p>}
       <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-3">
         {datos.map(({ t, pct, totalFilas, filasHechas, ultima }) => (
@@ -34,7 +34,7 @@ export function AvanceTareas() {
             <div className="mt-2 font-medium text-foreground">{t.titulo}</div>
             <div className="mt-2 flex items-end justify-between">
               <span className={`font-display text-4xl ${pct === 100 ? "text-ov-olive-light" : ""}`}>{pct}%</span>
-              <span className="text-xs text-muted-foreground">hasta {fmt(t.fecha_fin)}</span>
+              <span className="text-xs text-muted-foreground">{t.fecha_inicio > s.hoy ? `empieza el ${fmt(t.fecha_inicio)}` : t.fecha_fin < s.hoy ? `plazo terminó el ${fmt(t.fecha_fin)}` : `hasta ${fmt(t.fecha_fin)}`}</span>
             </div>
             <div className="mt-2 h-2 overflow-hidden rounded-full bg-ov-beige-light">
               <div className="h-full bg-ov-olive-light" style={{ width: `${pct}%` }} />
