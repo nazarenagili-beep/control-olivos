@@ -152,7 +152,7 @@ function useStoreState() {
       return next;
     });
 
-  const setSeccionesHechas = (id: string, secs: string[]) => {
+  const setSeccionesHechas = (id: string, secs: string[], fechaDia?: string) => {
     const prev = tareas.find((t) => t.id === id);
     if (prev) {
       const antes = new Set(prev.secciones_hechas);
@@ -160,7 +160,8 @@ function useStoreState() {
       const hechas = secs.filter((x) => !antes.has(x));
       const quitadas = prev.secciones_hechas.filter((x) => !ahora.has(x));
       const nuevos: Registro[] = [];
-      const fecha = new Date().toISOString();
+      const ahoraIso = new Date().toISOString();
+      const fecha = fechaDia && fechaDia !== ahoraIso.slice(0, 10) ? `${fechaDia}T12:00:00.000Z` : ahoraIso;
       if (hechas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: hechas, accion: "hecho", usuario_id: currentUserId ?? "" });
       if (quitadas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: quitadas, accion: "desmarcado", usuario_id: currentUserId ?? "" });
       if (nuevos.length) setRegistros((r) => [...nuevos, ...r]);

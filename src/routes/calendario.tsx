@@ -10,6 +10,7 @@ import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { EstadoBadge, SimpleSelect, TIPO_BG, TIPO_ICON, TipoChip, PageHeader, seccionesTexto } from "@/components/ov";
 import { TaskDialog, nuevaTarea } from "@/components/TaskDialog";
 import { MatrizTareas } from "@/components/MatrizTareas";
+import { ParteDiario } from "@/components/ParteDiario";
 import { cn } from "@/lib/utils";
 
 export const Route = createFileRoute("/calendario")({
@@ -28,6 +29,7 @@ function Calendario() {
   const [mes, setMes] = useState(m);
   const [vista, setVista] = useState<"filas" | "mes" | "lista">("filas");
   const [sel, setSel] = useState<Tarea | null>(null);
+  const [parte, setParte] = useState(false);
   const [fCuadro, setFCuadro] = useState("todos");
   const [fTipo, setFTipo] = useState("todos");
   const [fEstado, setFEstado] = useState("todos");
@@ -88,11 +90,10 @@ function Calendario() {
         title="Calendario"
         subtitle="Tareas por cuadro, fila y zona"
         actions={
-          s.isAdmin && (
-            <Button onClick={() => setSel(nuevaTarea(s.hoy))}>
-              <Plus /> Nueva tarea
-            </Button>
-          )
+          <div className="flex flex-wrap gap-2">
+            <Button size="lg" onClick={() => setParte(true)}><Plus /> Anotar trabajo de hoy</Button>
+            {s.isAdmin && <Button variant="outline" onClick={() => setSel(nuevaTarea(s.hoy))}>Nueva tarea</Button>}
+          </div>
         }
       />
       <div className="ov-card mb-4 flex flex-wrap items-center gap-3 p-3">
@@ -156,6 +157,7 @@ function Calendario() {
           ))}
         </div>
       )}
+      {parte && <ParteDiario onClose={() => setParte(false)} />}
       {sel && <TaskDialog tarea={sel} onClose={() => setSel(null)} />}
     </>
   );
