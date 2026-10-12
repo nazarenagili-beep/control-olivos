@@ -11,6 +11,7 @@ import {
   Settings,
   ShieldCheck,
   Warehouse,
+  Wheat,
 } from "lucide-react";
 import logo from "@/assets/logo-olivares.png.asset.json";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ const NAV = [
   { to: "/productos", label: "Productos", icon: Package, admin: true },
   { to: "/plazos", label: "Plazos de seguridad", icon: ShieldCheck, admin: true },
   { to: "/stock", label: "Stock", icon: Warehouse },
+  { to: "/cosecha", label: "Cosecha y rendimiento", icon: Wheat, admin: true },
   { to: "/configuracion", label: "Configuración", icon: Settings, admin: true },
 ] as const;
 

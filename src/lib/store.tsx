@@ -27,9 +27,19 @@ export interface Registro {
   usuario_id: string;
 }
 
+export interface Cosecha {
+  id: string;
+  fecha: string;
+  campania: string;
+  hectareas: string;
+  kilos: number;
+  litros: number;
+  notas: string;
+}
+
 const nid = (p: string) => `${p}-${crypto.randomUUID()}`;
 
-type Tabla = "cuadros" | "filas" | "tareas" | "productos" | "aplicaciones" | "movimientos" | "registros" | "config";
+type Tabla = "cuadros" | "filas" | "tareas" | "productos" | "aplicaciones" | "movimientos" | "registros" | "config" | "cosechas";
 const db = supabase as unknown as { from: (t: string) => any }; // tablas genéricas (id, data jsonb)
 
 /** Guarda en la base de datos los elementos nuevos/cambiados y borra los quitados (comparando por referencia). */
@@ -62,6 +72,7 @@ function useStoreState() {
   const [aplicaciones, setAplicaciones] = useState<Aplicacion[]>([]);
   const [movimientos, setMovimientos] = useState<Movimiento[]>([]);
   const [registros, setRegistros] = useState<Registro[]>([]);
+  const [cosechas, setCosechas] = useState<Cosecha[]>([]);
   const [configs, setConfigs] = useState<(ConfigAvisos & { id: string })[]>([]);
   const config: ConfigAvisos = configs[0] ?? configInicial;
   const setConfig = (c: ConfigAvisos) => setConfigs([{ ...c, id: "main" }]);
@@ -70,6 +81,7 @@ function useStoreState() {
     cuadros: useRef<Cuadro[] | null>(null), filas: useRef<Fila[] | null>(null), tareas: useRef<Tarea[] | null>(null),
     productos: useRef<Producto[] | null>(null), aplicaciones: useRef<Aplicacion[] | null>(null), movimientos: useRef<Movimiento[] | null>(null),
     registros: useRef<Registro[] | null>(null), config: useRef<(ConfigAvisos & { id: string })[] | null>(null),
+    cosechas: useRef<Cosecha[] | null>(null),
   };
 
   const cargar = async (uid: string) => {
@@ -85,6 +97,7 @@ function useStoreState() {
         leer<Movimiento>("movimientos"), leer<Registro>("registros"), leer<ConfigAvisos & { id: string }>("config"),
         supabase.from("profiles").select("*"), supabase.from("user_roles").select("*"),
       ]);
+      const cs = await leer<Cosecha>("cosechas").catch(() => [] as Cosecha[]);
       const us: Usuario[] = (pe.data ?? []).map((p) => ({
         id: p.id, nombre: p.nombre, email: p.email, activo: p.activo,
         rol: (ro.data ?? []).some((r) => r.user_id === p.id && r.role === "admin") ? "admin" : "campo",
@@ -93,7 +106,8 @@ function useStoreState() {
       const ordenFecha = <T extends { fecha: string },>(x: T[]) => x.sort((a, b) => b.fecha.localeCompare(a.fecha));
       refs.cuadros.current = cu; refs.filas.current = fi; refs.tareas.current = ta; refs.productos.current = pr;
       refs.aplicaciones.current = ordenFecha(ap); refs.movimientos.current = ordenFecha(mo); refs.registros.current = ordenFecha(re); refs.config.current = co;
-      setCuadros(cu); setFilas(fi); setTareas(ta); setProductos(pr); setAplicaciones(ap); setMovimientos(mo); setRegistros(re); setConfigs(co);
+      refs.cosechas.current = ordenFecha(cs); setCosechas(cs);
+      setCuadros(cu); setFilas(fi); setTareas(ta.filter((t) => t.tipo !== "cosecha")); setProductos(pr); setAplicaciones(ap); setMovimientos(mo); setRegistros(re); setConfigs(co);
       setUsuarios(us); setCurrentUserId(uid); setSinAcceso(false); setListo(true);
     } catch (e) {
       toast.error(`No se pudieron cargar los datos: ${(e as Error).message}`);
@@ -108,6 +122,7 @@ function useStoreState() {
   useSync("movimientos", movimientos, listo, refs.movimientos);
   useSync("registros", registros, listo, refs.registros);
   useSync("config", configs, listo, refs.config);
+  useSync("cosechas", cosechas, listo, refs.cosechas);
 
   const user = usuarios.find((u) => u.id === currentUserId) ?? { id: "", nombre: "", email: "", rol: "campo" as const, activo: false };
   const isAdmin = user.rol === "admin";
@@ -233,7 +248,12 @@ function useStoreState() {
     setUsuarios((us) => us.map((x) => (x.id === u.id ? u : x)));
   };
 
+  const saveCosecha = (c: Cosecha) =>
+    setCosechas((cs) => [...(cs.some((x) => x.id === c.id) ? cs.map((x) => (x.id === c.id ? c : x)) : [...cs, { ...c, id: nid("co") }])].sort((a, b) => b.fecha.localeCompare(a.fecha)));
+  const deleteCosecha = (id: string) => setCosechas((cs) => cs.filter((c) => c.id !== id));
+
   return {
+    cosechas, saveCosecha, deleteCosecha,
     hoy, usuarios, user, isAdmin, listo, sinAcceso, cargar, currentUserId, cuadros, setCuadros, filas, setFilas, tareas, productos, aplicaciones,
     movimientos, registros, config, setConfig, saveTarea, deleteTarea, setEstadoTarea, setSeccionesHechas, addAplicacion, deleteAplicacion, saveProducto,
     addCompra, addAjuste, crearFilasMasivo, regenerarPlan, saveUsuario,
