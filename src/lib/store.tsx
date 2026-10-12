@@ -20,6 +20,24 @@ import {
 } from "./data";
 import { addDays, addMonths, hoyAR } from "./logic";
 
+export interface Registro {
+  id: string;
+  fecha: string; // ISO con hora
+  tarea_id: string;
+  titulo: string;
+  tipo: Tarea["tipo"];
+  secciones: string[];
+  accion: "hecho" | "desmarcado";
+  usuario_id: string;
+}
+
+function registrosIniciales(ts: Tarea[]): Registro[] {
+  const hace = (d: number) => new Date(Date.now() - d * 86400000).toISOString();
+  return ts
+    .filter((t) => t.secciones_hechas.length)
+    .map((t, i) => ({ id: `r-ini-${i}`, fecha: hace(2 + i * 5), tarea_id: t.id, titulo: t.titulo, tipo: t.tipo, secciones: t.secciones_hechas, accion: "hecho" as const, usuario_id: t.responsable_id ?? "u-admin" }));
+}
+
 let seq = 1000;
 const nid = (p: string) => `${p}-${++seq}`;
 
@@ -33,6 +51,7 @@ function useStoreState() {
   const [productos, setProductos] = useState<Producto[]>(productosIniciales);
   const [aplicaciones, setAplicaciones] = useState<Aplicacion[]>(aplicacionesIniciales);
   const [movimientos, setMovimientos] = useState<Movimiento[]>(movimientosIniciales);
+  const [registros, setRegistros] = useState<Registro[]>(() => registrosIniciales(tareas));
   const [config, setConfig] = useState<ConfigAvisos>(configInicial);
 
   const user = usuarios.find((u) => u.id === currentUserId)!;
@@ -78,8 +97,21 @@ function useStoreState() {
       return next;
     });
 
-  const setSeccionesHechas = (id: string, secs: string[]) =>
+  const setSeccionesHechas = (id: string, secs: string[]) => {
+    const prev = tareas.find((t) => t.id === id);
+    if (prev) {
+      const antes = new Set(prev.secciones_hechas);
+      const ahora = new Set(secs);
+      const hechas = secs.filter((x) => !antes.has(x));
+      const quitadas = prev.secciones_hechas.filter((x) => !ahora.has(x));
+      const nuevos: Registro[] = [];
+      const fecha = new Date().toISOString();
+      if (hechas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: hechas, accion: "hecho", usuario_id: currentUserId });
+      if (quitadas.length) nuevos.push({ id: nid("r"), fecha, tarea_id: id, titulo: prev.titulo, tipo: prev.tipo, secciones: quitadas, accion: "desmarcado", usuario_id: currentUserId });
+      if (nuevos.length) setRegistros((r) => [...nuevos, ...r]);
+    }
     setTareas((ts) => ts.map((t) => (t.id === id ? { ...t, secciones_hechas: secs, estado: t.estado === "pendiente" && secs.length ? "en_curso" : t.estado } : t)));
+  };
 
   const addAplicacion = (a: Omit<Aplicacion, "id" | "fecha_libre_cosecha">) => {
     const prod = productos.find((p) => p.id === a.producto_id)!;
@@ -139,7 +171,7 @@ function useStoreState() {
 
   return {
     hoy, usuarios, user, isAdmin, setCurrentUserId, cuadros, setCuadros, filas, setFilas, tareas, productos, aplicaciones,
-    movimientos, config, setConfig, saveTarea, deleteTarea, setEstadoTarea, setSeccionesHechas, addAplicacion, deleteAplicacion, saveProducto,
+    movimientos, registros, config, setConfig, saveTarea, deleteTarea, setEstadoTarea, setSeccionesHechas, addAplicacion, deleteAplicacion, saveProducto,
     addCompra, addAjuste, crearFilasMasivo, regenerarPlan, saveUsuario,
   };
 }
