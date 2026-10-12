@@ -217,7 +217,6 @@ interface PlanBase {
 const PLAN: PlanBase[] = [
   // Verano (dic, ene, feb)
   { key: "v-foliar", titulo: "Fertilizante foliar (nutrientes)", tipo: "abonado", desc: "Fertilizante foliar.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
-  { key: "v-polillas", titulo: "Fumigación de polillas", tipo: "tratamiento", desc: "Fumigación contra polillas.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
   { key: "v-brotes", titulo: "Quitar brotes (fortalecer planta)", tipo: "poda", desc: "Quitar brotes para fortalecer la planta.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
   { key: "v-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas. Mezcla: 1 rayita de aceite 2T por cada litro de nafta.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
   // Otoño (mar, abr, may)
@@ -231,7 +230,6 @@ const PLAN: PlanBase[] = [
   { key: "i-poda-olivos", titulo: "Poda de olivos", tipo: "poda", desc: "Poda de los olivos productivos (hectáreas 1, 2 y 3).", ini: [7, 1], fin: [8, 31], cuadro: "c-prod" },
   { key: "i-poda", titulo: "Poda de formación (ramas muertas y débiles)", tipo: "poda", desc: "Quitar ramas muertas y débiles.", ini: [6, 1], fin: [8, 31], cuadro: null },
   { key: "i-trat", titulo: "Tratamiento previsión de enfermedades", tipo: "tratamiento", desc: "Tratamiento preventivo (cobre tras cosecha y poda).", ini: [6, 1], fin: [8, 31], cuadro: null },
-  { key: "i-aceite", titulo: "Producción aceite", tipo: "otro", desc: "Producción de aceite.", ini: [6, 1], fin: [8, 31], cuadro: "c-prod" },
   // Primavera (sep, oct, nov)
   { key: "p-chupones", titulo: "Limpieza de chupones", tipo: "poda", desc: "Quitar chupones del tronco y la base (hectáreas 1, 2 y 3).", ini: [10, 1], fin: [2, 28], cuadro: "c-prod", sigAnio: true },
   { key: "p-foliar", titulo: "Fertilizante foliar (nutrientes)", tipo: "abonado", desc: "Clorofib 3 cc por litro (45 cc por mochila de 15 L). Cada 2 semanas de octubre a finales de diciembre.", ini: [10, 1], fin: [12, 31], cuadro: null },
@@ -239,7 +237,6 @@ const PLAN: PlanBase[] = [
   { key: "p-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas. Mezcla: 1 rayita de aceite 2T por cada litro de nafta.", ini: [9, 1], fin: [11, 30], cuadro: null },
   { key: "p-cochinilla", titulo: "Tratamiento cochinilla", tipo: "tratamiento", desc: "Cipermetrina 15 cc + coadyuvante 75 cc + jabón potásico 150 cc por mochila de 15 L. Cada 15 días (cada 7 si hay mucha). Solo hectáreas 1, 2 y 3.", ini: [9, 1], fin: [11, 30], cuadro: "c-prod" },
   { key: "p-poda", titulo: "Poda de producción", tipo: "poda", desc: "Poda de producción.", ini: [9, 1], fin: [9, 30], cuadro: "c-prod" },
-  { key: "p-aceite", titulo: "Producción aceite", tipo: "otro", desc: "Producción de aceite.", ini: [9, 1], fin: [9, 30], cuadro: "c-prod" },
   { key: "p-plantar", titulo: "Plantar plantas que están muertas", tipo: "mantenimiento", desc: "Reponer olivos muertos.", ini: [10, 1], fin: [11, 30], cuadro: null },
 ];
 
