@@ -224,7 +224,6 @@ const PLAN: PlanBase[] = [
   { key: "v-curas", titulo: "Curas preventivas plantines (cobre y azufre)", tipo: "tratamiento", desc: "Oxicloruro de cobre 25 g y azufre 30 g por 10 L. Cada 2 semanas, de fin de febrero a mediados de marzo. Disolver bien el cobre; no con calor.", ini: [2, 20], fin: [3, 15], cuadro: "c-joven" },
   { key: "o-brotes", titulo: "Quitar brotes", tipo: "poda", desc: "Quitar brotes.", ini: [3, 1], fin: [5, 31], cuadro: null },
   { key: "o-prep", titulo: "Preparación de cosecha", tipo: "control", desc: "Seguimiento de maduración y preparación de la cosecha.", ini: [3, 1], fin: [3, 31], cuadro: "c-prod" },
-  { key: "o-cosecha", titulo: "Cosecha", tipo: "cosecha", desc: "Cosecha manual. Moler en menos de 24 h desde la recolección.", ini: [4, 1], fin: [5, 31], cuadro: "c-prod" },
   { key: "o-abono", titulo: "Fertilizar con abono", tipo: "abonado", desc: "Fertilizar con abono.", ini: [3, 1], fin: [5, 31], cuadro: null },
   { key: "o-helada", titulo: "Antihelada", tipo: "tratamiento", desc: "Protección antihelada.", ini: [5, 1], fin: [5, 31], cuadro: null },
   { key: "o-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas. Mezcla: 1 rayita de aceite 2T por cada litro de nafta.", ini: [3, 1], fin: [5, 31], cuadro: null },
@@ -232,7 +231,6 @@ const PLAN: PlanBase[] = [
   { key: "i-poda-olivos", titulo: "Poda de olivos", tipo: "poda", desc: "Poda de los olivos productivos (hectáreas 1, 2 y 3).", ini: [7, 1], fin: [8, 31], cuadro: "c-prod" },
   { key: "i-poda", titulo: "Poda de formación (ramas muertas y débiles)", tipo: "poda", desc: "Quitar ramas muertas y débiles.", ini: [6, 1], fin: [8, 31], cuadro: null },
   { key: "i-trat", titulo: "Tratamiento previsión de enfermedades", tipo: "tratamiento", desc: "Tratamiento preventivo (cobre tras cosecha y poda).", ini: [6, 1], fin: [8, 31], cuadro: null },
-  { key: "i-cosecha", titulo: "Cosecha", tipo: "cosecha", desc: "Final de cosecha. Moler en menos de 24 h desde la recolección.", ini: [6, 1], fin: [6, 30], cuadro: "c-prod" },
   { key: "i-aceite", titulo: "Producción aceite", tipo: "otro", desc: "Producción de aceite.", ini: [6, 1], fin: [8, 31], cuadro: "c-prod" },
   // Primavera (sep, oct, nov)
   { key: "p-chupones", titulo: "Limpieza de chupones", tipo: "poda", desc: "Quitar chupones del tronco y la base (hectáreas 1, 2 y 3).", ini: [10, 1], fin: [2, 28], cuadro: "c-prod", sigAnio: true },
