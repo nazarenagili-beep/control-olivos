@@ -1,0 +1,3 @@
+delete from public.tareas where id ~ '^plan-\d{4}-(v-foliar|v-brotes|o-brotes|v-malezas)$';
+update public.tareas set data = jsonb_set(data,'{fecha_fin}', to_jsonb((substr(id,6,4)::int+1)::text || '-02-28')), updated_at=now() where id ~ '^plan-\d{4}-(p-foliar|p-malezas)$';
+update public.tareas set data = jsonb_set(data,'{fecha_fin}', to_jsonb((substr(id,6,4)::int+1)::text || '-05-31')), updated_at=now() where id ~ '^plan-\d{4}-p-chupones$';

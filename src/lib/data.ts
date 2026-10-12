@@ -216,12 +216,8 @@ interface PlanBase {
 }
 const PLAN: PlanBase[] = [
   // Verano (dic, ene, feb)
-  { key: "v-foliar", titulo: "Fertilizante foliar (nutrientes)", tipo: "abonado", desc: "Fertilizante foliar.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
-  { key: "v-brotes", titulo: "Quitar brotes (fortalecer planta)", tipo: "poda", desc: "Quitar brotes para fortalecer la planta.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
-  { key: "v-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas. Mezcla: 1 rayita de aceite 2T por cada litro de nafta.", ini: [12, 1], fin: [2, 28], cuadro: null, sigAnio: true },
   // Otoño (mar, abr, may)
   { key: "v-curas", titulo: "Curas preventivas plantines (cobre y azufre)", tipo: "tratamiento", desc: "Oxicloruro de cobre 25 g y azufre 30 g por 10 L. Cada 2 semanas, de fin de febrero a mediados de marzo. Disolver bien el cobre; no con calor.", ini: [2, 20], fin: [3, 15], cuadro: "c-joven" },
-  { key: "o-brotes", titulo: "Quitar brotes", tipo: "poda", desc: "Quitar brotes.", ini: [3, 1], fin: [5, 31], cuadro: null },
   { key: "o-prep", titulo: "Preparación de cosecha", tipo: "control", desc: "Seguimiento de maduración y preparación de la cosecha.", ini: [3, 1], fin: [3, 31], cuadro: "c-prod" },
   { key: "o-abono", titulo: "Fertilizar con abono", tipo: "abonado", desc: "Fertilizar con abono.", ini: [3, 1], fin: [5, 31], cuadro: null },
   { key: "o-helada", titulo: "Antihelada", tipo: "tratamiento", desc: "Protección antihelada.", ini: [5, 1], fin: [5, 31], cuadro: null },
@@ -231,10 +227,10 @@ const PLAN: PlanBase[] = [
   { key: "i-poda", titulo: "Poda de formación (ramas muertas y débiles)", tipo: "poda", desc: "Quitar ramas muertas y débiles.", ini: [6, 1], fin: [8, 31], cuadro: null },
   { key: "i-trat", titulo: "Tratamiento previsión de enfermedades", tipo: "tratamiento", desc: "Tratamiento preventivo (cobre tras cosecha y poda).", ini: [6, 1], fin: [8, 31], cuadro: null },
   // Primavera (sep, oct, nov)
-  { key: "p-chupones", titulo: "Limpieza de chupones", tipo: "poda", desc: "Quitar chupones del tronco y la base (hectáreas 1, 2 y 3).", ini: [10, 1], fin: [2, 28], cuadro: "c-prod", sigAnio: true },
-  { key: "p-foliar", titulo: "Fertilizante foliar (nutrientes)", tipo: "abonado", desc: "Clorofib 3 cc por litro (45 cc por mochila de 15 L). Cada 2 semanas de octubre a finales de diciembre.", ini: [10, 1], fin: [12, 31], cuadro: null },
+  { key: "p-chupones", titulo: "Limpieza de chupones", tipo: "poda", desc: "Quitar chupones del tronco y la base (hectáreas 1, 2 y 3).", ini: [10, 1], fin: [5, 31], cuadro: "c-prod", sigAnio: true },
+  { key: "p-foliar", titulo: "Fertilizante foliar (nutrientes)", tipo: "abonado", desc: "Clorofib 3 cc por litro (45 cc por mochila de 15 L). Cada 2 semanas de octubre a finales de diciembre.", ini: [10, 1], fin: [2, 28], cuadro: null, sigAnio: true },
   { key: "p-yuyos", titulo: "Fumigación (mata yuyos)", tipo: "tratamiento", desc: "Glifosato 300 cc por 10 L y A35T 5 cc por 10 L. Sin viento, temprano o al atardecer.", ini: [9, 1], fin: [11, 30], cuadro: null },
-  { key: "p-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas. Mezcla: 1 rayita de aceite 2T por cada litro de nafta.", ini: [9, 1], fin: [11, 30], cuadro: null },
+  { key: "p-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas. Mezcla: 1 rayita de aceite 2T por cada litro de nafta.", ini: [9, 1], fin: [2, 28], cuadro: null, sigAnio: true },
   { key: "p-cochinilla", titulo: "Tratamiento cochinilla", tipo: "tratamiento", desc: "Cipermetrina 15 cc + coadyuvante 75 cc + jabón potásico 150 cc por mochila de 15 L. Cada 15 días (cada 7 si hay mucha). Solo hectáreas 1, 2 y 3.", ini: [9, 1], fin: [11, 30], cuadro: "c-prod" },
   { key: "p-poda", titulo: "Poda de producción", tipo: "poda", desc: "Poda de producción.", ini: [9, 1], fin: [9, 30], cuadro: "c-prod" },
   { key: "p-plantar", titulo: "Plantar plantas que están muertas", tipo: "mantenimiento", desc: "Reponer olivos muertos.", ini: [10, 1], fin: [11, 30], cuadro: null },
