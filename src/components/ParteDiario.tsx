@@ -12,7 +12,7 @@ type Zona = "A" | "B" | "AB";
 export function ParteDiario({ onClose }: { onClose: () => void }) {
   const s = useStore();
   const [fecha, setFecha] = useState(s.hoy);
-  const [tareaId, setTareaId] = useState("");
+  const [tareaId, setTareaId] = useState("none");
   const [ha, setHa] = useState<number | null>(null);
   const [nums, setNums] = useState<number[]>([]);
   const [zona, setZona] = useState<Zona>("AB");
@@ -60,11 +60,11 @@ export function ParteDiario({ onClose }: { onClose: () => void }) {
         <div className="space-y-5">
           <section className="space-y-1.5">
             <label className="text-sm font-semibold">1. Fecha</label>
-            <Input type="date" value={fecha} max={s.hoy} onChange={(e) => { setFecha(e.target.value); elegirTarea(""); }} className="h-12 text-base" />
+            <Input type="date" value={fecha} max={s.hoy} onChange={(e) => { setFecha(e.target.value); elegirTarea("none"); }} className="h-12 text-base" />
           </section>
           <section className="space-y-1.5">
             <label className="text-sm font-semibold">2. Tarea</label>
-            <SimpleSelect value={tareaId} onChange={elegirTarea} options={[{ value: "", label: "Elegir tarea…" }, ...opciones.map((t) => ({ value: t.id, label: t.titulo }))]} className="h-12" />
+            <SimpleSelect value={tareaId} onChange={elegirTarea} options={[{ value: "none", label: "Elegir tarea…" }, ...opciones.map((t) => ({ value: t.id, label: t.titulo }))]} className="h-12" />
             {opciones.length === 0 && <p className="text-xs text-muted-foreground">No hay tareas previstas para esa fecha.</p>}
           </section>
           {tarea && (
