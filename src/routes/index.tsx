@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState } from "react";
 import { CheckCircle2, Circle, Filter, X } from "lucide-react";
 import { pageHead } from "@/lib/head";
 import { useStore } from "@/lib/store";
@@ -89,8 +89,6 @@ function InicioAdmin() {
   const pasaEstado = (i: Item) => estado === "todas" || (estado === "hecho" ? i.hecho : !i.hecho);
   const filtrados = base.filter(pasaEstado);
   const activos = [dias !== 7, estado !== "hecho", tipo !== "todos", ha !== 0, fila !== 0, lado !== "ambos"].filter(Boolean).length;
-  const hechos = filtrados.filter((i) => i.hecho).length;
-  const pendientes = filtrados.length - hechos;
 
   // Cada tarjeta muestra la tarea completa (hecho y lo que falta), aunque el filtro sea "Realizadas".
   const porTarea = [...base.reduce((m, i) => m.set(i.tarea.id, [...(m.get(i.tarea.id) ?? []), i]), new Map<string, Item[]>()).values()]
@@ -116,13 +114,6 @@ function InicioAdmin() {
     return out.join(" · ");
   };
 
-  const Box = ({ t, v, children, tone }: { t: string; v: number | string; children?: ReactNode; tone?: string }) => (
-    <div className="ov-card p-4">
-      <div className="text-xs uppercase tracking-wider text-muted-foreground">{t}</div>
-      <div className={`font-display text-4xl ${tone ?? ""}`}>{v}</div>
-      {children && <div className="text-xs text-muted-foreground">{children}</div>}
-    </div>
-  );
 
   return (
     <>
@@ -160,11 +151,6 @@ function InicioAdmin() {
         </div>
       </section>}
 
-      <div className="mb-6 grid grid-cols-3 gap-3">
-        <Box t="Realizado" v={hechos} tone="text-ov-olive-light">medias filas</Box>
-        <Box t="Pendiente" v={pendientes} tone={pendientes ? "text-danger" : ""}>medias filas</Box>
-        <Box t="Avance" v={filtrados.length ? `${Math.round((hechos / filtrados.length) * 100)}%` : "—"}>{porTarea.length} tareas</Box>
-      </div>
 
       <section className="ov-card mb-6 p-5">
         <h3 className="mb-1 text-xl">Qué se hizo y qué falta</h3>
