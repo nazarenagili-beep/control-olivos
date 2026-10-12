@@ -21,12 +21,12 @@ import { supabase } from "@/integrations/supabase/client";
 
 const NAV = [
   { to: "/", label: "Inicio", icon: Home },
-  { to: "/informacion", label: "Información relevante", icon: Info },
+  { to: "/informacion", label: "Información relevante", icon: Info, admin: true },
   { to: "/calendario", label: "Registro de tareas", icon: CalendarDays },
-  { to: "/tratamientos", label: "Tratamientos", icon: FlaskConical },
+  { to: "/tratamientos", label: "Guía de productos", icon: FlaskConical },
   { to: "/calculadora", label: "Calculadora", icon: Calculator },
-  { to: "/productos", label: "Productos", icon: Package },
-  { to: "/plazos", label: "Plazos de seguridad", icon: ShieldCheck },
+  { to: "/productos", label: "Productos", icon: Package, admin: true },
+  { to: "/plazos", label: "Plazos de seguridad", icon: ShieldCheck, admin: true },
   { to: "/stock", label: "Stock", icon: Warehouse, admin: true },
   { to: "/configuracion", label: "Configuración", icon: Settings, admin: true },
 ] as const;

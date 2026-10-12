@@ -8,6 +8,7 @@ import { TIPO_LABEL, type Tarea, type TipoTarea } from "@/lib/data";
 import { PageHeader, TipoChip, haDeFila } from "@/components/ov";
 import { CampoMapa } from "@/components/CampoMapa";
 import { TaskDialog } from "@/components/TaskDialog";
+import { InicioTrabajador } from "@/components/InicioTrabajador";
 
 export const Route = createFileRoute("/")({
   head: () => pageHead("Inicio", "Resumen del campo: qué se hizo y qué falta, por fecha, tarea, hectárea, fila y lado."),
@@ -38,6 +39,11 @@ function Chips<T extends string | number>({ label, value, onChange, opts }: { la
 }
 
 function Inicio() {
+  const s = useStore();
+  return s.isAdmin ? <InicioAdmin /> : <InicioTrabajador />;
+}
+
+function InicioAdmin() {
   const s = useStore();
   const [dias, setDias] = useState(7);
   const [tipo, setTipo] = useState<TipoTarea | "todos">("todos");
