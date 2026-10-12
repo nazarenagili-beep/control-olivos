@@ -36,7 +36,7 @@ function Tratamientos() {
                   </div>
                   <p className="mt-1 text-sm"><span className="font-semibold">Para qué sirve:</span> {p.uso || "—"}</p>
                   <p className="mt-1 text-sm"><span className="font-semibold">Dosis:</span> {num(p.dosis_recomendada)} {UNIDAD_DOSIS_LABEL[p.unidad_dosis]}</p>
-                  <p className="mt-1 text-sm"><span className="font-semibold">Días de espera antes de cosechar:</span> {p.plazo_seguridad_dias}</p>
+                  <p className="status-danger mt-2 inline-block rounded-full px-3 py-1 text-sm font-semibold">Espera antes de cosechar: {p.plazo_seguridad_dias} días</p>
                   {p.notas && <p className="mt-1 text-sm text-muted-foreground"><span className="font-semibold text-foreground">Precauciones:</span> {p.notas}</p>}
                 </Link>
               ))}
