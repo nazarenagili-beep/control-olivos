@@ -20,7 +20,9 @@ export function ParteDiario({ onClose }: { onClose: () => void }) {
 
   // Labores que aplican en la fecha elegida (una por título)
   const opciones = useMemo(() => {
-    const vigentes = s.tareas.filter((t) => t.fecha_inicio <= fecha && t.fecha_fin >= fecha);
+    // Incluye tareas cuyo plazo terminó hace poco (p. ej. tareas de un día hechas con retraso)
+    const limite = new Date(new Date(fecha + "T12:00:00Z").getTime() - 90 * 86400000).toISOString().slice(0, 10);
+    const vigentes = s.tareas.filter((t) => t.fecha_inicio <= fecha && t.fecha_fin >= limite && t.estado !== "hecha");
     const vistos = new Set<string>();
     return vigentes.filter((t) => (vistos.has(t.titulo) ? false : (vistos.add(t.titulo), true))).sort((a, b) => a.titulo.localeCompare(b.titulo));
   }, [s.tareas, fecha]);
