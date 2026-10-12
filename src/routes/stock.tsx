@@ -116,10 +116,13 @@ function Stock() {
         <div className="ov-card p-5">
           <h3 className="mb-2 text-xl">Movimientos</h3>
           <ul className="divide-y divide-border text-sm">
-            {s.movimientos.slice(0, 15).map((m) => (
-              <li key={m.id} className="flex justify-between gap-2 py-2">
-                <span>{fmt(m.fecha)} · {PN(m.producto_id)?.nombre_comercial} · {m.tipo}{m.nota && ` · ${m.nota}`}</span>
-                <span className={m.cantidad < 0 ? "text-danger" : "text-ok"}>{m.cantidad > 0 ? "+" : ""}{num(m.cantidad, 3)} {PN(m.producto_id)?.unidad_stock}</span>
+            {s.movimientos.length === 0 && <li className="py-2 text-muted-foreground">Sin movimientos todavía.</li>}
+            {s.movimientos.slice(0, 30).map((m) => (
+              <li key={m.id}>
+                <button type="button" disabled={m.tipo === "aplicacion"} onClick={() => abrirEdicion(m.id)} className="flex w-full justify-between gap-2 py-2 text-left enabled:hover:bg-ov-beige-light">
+                  <span>{fmt(m.fecha)} · {PN(m.producto_id)?.nombre_comercial} · {m.tipo}{m.nota && ` · ${m.nota}`}{m.tipo !== "aplicacion" && <span className="ml-1 text-xs text-muted-foreground">(tocar para corregir)</span>}</span>
+                  <span className={m.cantidad < 0 ? "text-danger" : "text-ok"}>{m.cantidad > 0 ? "+" : ""}{num(m.cantidad, 3)} {PN(m.producto_id)?.unidad_stock}</span>
+                </button>
               </li>
             ))}
           </ul>
@@ -137,17 +140,30 @@ function Stock() {
           </table>
         </div>
       </div>
-      <Dialog open={!!modo} onOpenChange={(o) => !o && setModo(null)}>
+      <Dialog open={!!modo} onOpenChange={(o) => !o && cerrar()}>
         <DialogContent>
-          <DialogHeader><DialogTitle className="font-display text-2xl font-medium">{modo === "compra" ? "Registrar compra" : "Ajuste manual"}</DialogTitle></DialogHeader>
+          <DialogHeader><DialogTitle className="font-display text-2xl font-medium">{editando ? (modo === "compra" ? "Corregir compra" : "Corregir ajuste") : modo === "compra" ? "Registrar compra" : "Ajuste de stock"}</DialogTitle></DialogHeader>
           <div className="grid gap-4">
-            <Field label="Producto"><SimpleSelect value={prod} onChange={setProd} options={s.productos.map((p) => ({ value: p.id, label: `${p.nombre_comercial} (${p.unidad_stock})` }))} /></Field>
-            <Field label={modo === "compra" ? "Cantidad" : "Cantidad (negativa para restar)"}><Input type="number" step="any" className="h-11" value={cant} onChange={(e) => setCant(e.target.value)} /></Field>
+            <Field label="Producto"><SimpleSelect value={prod} onChange={(v) => !editando && setProd(v)} options={s.productos.map((p) => ({ value: p.id, label: `${p.nombre_comercial} (${p.unidad_stock})` }))} /></Field>
+            {modo === "ajuste" && (
+              <Field label="¿Qué quieres hacer?">
+                <div className="grid grid-cols-3 gap-2">
+                  {([["total", "Tengo en total"], ["sumar", "Sumar"], ["restar", "Restar"]] as const).filter(([k]) => !editando || k !== "total").map(([k, l]) => (
+                    <Button key={k} type="button" variant={forma === k ? "default" : "outline"} className="h-11" onClick={() => setForma(k)}>{l}</Button>
+                  ))}
+                </div>
+              </Field>
+            )}
+            <Field label={modo === "compra" ? `Cantidad comprada (${prodSel?.unidad_stock ?? ""})` : forma === "total" ? `Cantidad que hay hoy en el galpón (${prodSel?.unidad_stock ?? ""})` : `Cantidad a ${forma} (${prodSel?.unidad_stock ?? ""})`}><Input type="number" step="any" min={0} className="h-11" value={cant} onChange={(e) => setCant(e.target.value)} /></Field>
+            {modo === "ajuste" && forma === "total" && prodSel && <p className="text-sm text-muted-foreground">Ahora la app tiene {num(prodSel.stock_actual, 3)} {prodSel.unidad_stock}. Se cambiará a lo que escribas.</p>}
             {modo === "compra" && <Field label="Precio total (ARS)"><Input type="number" className="h-11" value={precio} onChange={(e) => setPrecio(e.target.value)} /></Field>}
             <Field label="Fecha"><Input type="date" className="h-11" value={fecha} onChange={(e) => setFecha(e.target.value)} /></Field>
-            <Field label={modo === "compra" ? "Nota" : "Motivo (rotura, recuento, vencido…)"}><Input className="h-11" value={nota} onChange={(e) => setNota(e.target.value)} /></Field>
+            <Field label={modo === "compra" ? "Nota" : "Motivo (opcional: recuento, rotura, vencido…)"}><Input className="h-11" value={nota} onChange={(e) => setNota(e.target.value)} /></Field>
           </div>
-          <DialogFooter><Button variant="outline" onClick={() => setModo(null)}>Cancelar</Button><Button onClick={guardar}>Guardar</Button></DialogFooter>
+          <DialogFooter className="gap-2">
+            {editando && <Button variant="outline" className="mr-auto text-danger" onClick={borrar}>Borrar</Button>}
+            <Button variant="outline" onClick={cerrar}>Cancelar</Button><Button onClick={guardar}>Guardar</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </>
