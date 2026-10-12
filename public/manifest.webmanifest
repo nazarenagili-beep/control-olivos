@@ -1,0 +1,13 @@
+{
+  "name": "Cuaderno de Campo · Olivares Villairenses",
+  "short_name": "Olivares",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#14190F",
+  "theme_color": "#14190F",
+  "lang": "es",
+  "icons": [
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ]
+}
