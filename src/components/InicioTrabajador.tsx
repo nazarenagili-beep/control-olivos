@@ -4,7 +4,7 @@ import { useStore } from "@/lib/store";
 import { addDays, fmt } from "@/lib/logic";
 import { Button } from "@/components/ui/button";
 import { PageHeader, seccionesTexto } from "@/components/ov";
-import { CampoMapa } from "@/components/CampoMapa";
+import { AvanceTareas } from "@/components/AvanceTareas";
 import { ParteDiario } from "@/components/ParteDiario";
 import { AlertaPlazos } from "@/components/AlertaPlazos";
 
@@ -43,8 +43,8 @@ export function InicioTrabajador() {
       </section>
 
       <section>
-        <h2 className="mb-3 text-2xl">Mapa del campo</h2>
-        <CampoMapa />
+        
+        <AvanceTareas />
       </section>
       {parte && <ParteDiario onClose={() => setParte(false)} />}
     </>
