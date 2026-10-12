@@ -227,11 +227,13 @@ const PLAN: PlanBase[] = [
   { key: "o-helada", titulo: "Antihelada", tipo: "tratamiento", desc: "Protección antihelada.", ini: [5, 1], fin: [5, 31], cuadro: null },
   { key: "o-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas. Mezcla: 1 rayita de aceite 2T por cada litro de nafta.", ini: [3, 1], fin: [5, 31], cuadro: null },
   // Invierno (jun, jul, ago)
+  { key: "i-poda-olivos", titulo: "Poda de olivos", tipo: "poda", desc: "Poda de los olivos productivos (hectáreas 1, 2 y 3).", ini: [7, 1], fin: [8, 31], cuadro: "c-prod" },
   { key: "i-poda", titulo: "Poda de formación (ramas muertas y débiles)", tipo: "poda", desc: "Quitar ramas muertas y débiles.", ini: [6, 1], fin: [8, 31], cuadro: null },
   { key: "i-trat", titulo: "Tratamiento previsión de enfermedades", tipo: "tratamiento", desc: "Tratamiento preventivo (cobre tras cosecha y poda).", ini: [6, 1], fin: [8, 31], cuadro: null },
   { key: "i-cosecha", titulo: "Cosecha", tipo: "cosecha", desc: "Final de cosecha. Moler en menos de 24 h desde la recolección.", ini: [6, 1], fin: [6, 30], cuadro: "c-prod" },
   { key: "i-aceite", titulo: "Producción aceite", tipo: "otro", desc: "Producción de aceite.", ini: [6, 1], fin: [8, 31], cuadro: "c-prod" },
   // Primavera (sep, oct, nov)
+  { key: "p-chupones", titulo: "Limpieza de chupones", tipo: "poda", desc: "Quitar chupones del tronco y la base (hectáreas 1, 2 y 3).", ini: [10, 1], fin: [2, 28], cuadro: "c-prod", sigAnio: true },
   { key: "p-foliar", titulo: "Fertilizante foliar (nutrientes)", tipo: "abonado", desc: "Chlorafit 3 cc por litro (45 cc por mochila de 15 L). Cada 2 semanas de octubre a finales de diciembre.", ini: [10, 1], fin: [12, 31], cuadro: null },
   { key: "p-yuyos", titulo: "Fumigación (mata yuyos)", tipo: "tratamiento", desc: "Glifosato 300 cc por 10 L y A35T 5 cc por 10 L. Sin viento, temprano o al atardecer.", ini: [9, 1], fin: [11, 30], cuadro: null },
   { key: "p-malezas", titulo: "Control de malezas (desmalezadora)", tipo: "mantenimiento", desc: "Pasar la desmalezadora entre filas. Mezcla: 1 rayita de aceite 2T por cada litro de nafta.", ini: [9, 1], fin: [11, 30], cuadro: null },
