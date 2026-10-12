@@ -248,10 +248,7 @@ const DIARIAS: { key: string; titulo: string; tipo: TipoTarea; desc: string; cua
   { key: "limpio", titulo: "Mantener el terreno limpio (alrededor de las plantas)", tipo: "mantenimiento", desc: "Limpiar alrededor de las plantas.", cuadro: null },
   { key: "sanas", titulo: "Controlar que las plantas estén bien o enfermas", tipo: "control", desc: "Revisar el estado sanitario.", cuadro: null },
 ];
-const PUNTUALES = [
-  { key: "esquejes", titulo: "Realizar esquejes", tipo: "otro" as TipoTarea },
-  { key: "viento", titulo: "Plantar árboles para parar el viento", tipo: "mantenimiento" as TipoTarea },
-];
+const PUNTUALES: { key: string; titulo: string; tipo: TipoTarea }[] = [];
 
 
 const iso = (y: number, m: number, d: number) =>
