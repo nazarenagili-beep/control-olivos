@@ -91,7 +91,10 @@ export function AppShell({ children }: { children: ReactNode }) {
             <Menu />
           </Button>
           <div className="flex-1" />
-          <span className="text-sm text-muted-foreground">{user.nombre} · {user.rol === "admin" ? "Administradora" : "Campo"}</span>
+          <span className="hidden text-sm text-muted-foreground sm:inline">{user.nombre} · {user.rol === "admin" ? "Administradora" : "Campo"}</span>
+          <Button variant="outline" size="sm" className="h-10" onClick={() => supabase.auth.signOut()}>
+            <LogOut className="size-4" /> Cerrar sesión
+          </Button>
         </header>
         <main className="mx-auto max-w-7xl px-4 py-8 md:px-8">{children}</main>
       </div>
